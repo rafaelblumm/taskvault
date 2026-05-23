@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS taskvault.user (
   id varchar(35) NOT NULL,
   name varchar(150) NOT NULL,
   email varchar(254) NOT NULL,
-  role enum('sysadmin','admin','user','guest') NOT NULL DEFAULT 'guest',
+  role enum('guest', 'user', 'admin', 'sysadmin') NOT NULL DEFAULT 'guest',
   password varchar(72) NOT NULL,
   deleted_at datetime DEFAULT NULL,
   PRIMARY KEY (id),
@@ -14,16 +14,16 @@ CREATE TABLE IF NOT EXISTS taskvault.user (
 
 -- Tabela de tarefas
 CREATE TABLE IF NOT EXISTS taskvault.task (
-  task bigint unsigned NOT NULL AUTO_INCREMENT,
+  id bigint unsigned NOT NULL AUTO_INCREMENT,
   title tinytext NOT NULL,
   description text,
-  status enum('pending','in progress','done') NOT NULL DEFAULT 'pending',
+  status enum('pending','in_progress','done') NOT NULL DEFAULT 'pending',
   creation_datetime datetime NOT NULL,
   due_date date DEFAULT NULL,
   creator_id varchar(35) NOT NULL,
   assignee_id varchar(35) DEFAULT NULL,
   deleted_at datetime DEFAULT NULL,
-  PRIMARY KEY (task),
+  PRIMARY KEY (id),
   KEY task_user_creator_FK (creator_id),
   KEY task_user_assignee_FK (assignee_id),
   CONSTRAINT task_user_assignee_FK FOREIGN KEY (assignee_id) REFERENCES user (id),
@@ -41,6 +41,6 @@ CREATE TABLE IF NOT EXISTS taskvault.comment (
   PRIMARY KEY (id),
   KEY comment_task_FK (task_id),
   KEY comment_user_FK (creator_id),
-  CONSTRAINT comment_task_FK FOREIGN KEY (task_id) REFERENCES task (task),
+  CONSTRAINT comment_task_FK FOREIGN KEY (task_id) REFERENCES task (id),
   CONSTRAINT comment_user_FK FOREIGN KEY (creator_id) REFERENCES user (id)
 );

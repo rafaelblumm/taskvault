@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.taskvault</groupId>
 	<artifactId>taskvault-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>taskvault-server</name>
 	<description>Aplicação de gestão de tarefas colaborativas</description>
 
