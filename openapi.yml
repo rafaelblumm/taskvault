@@ -531,10 +531,12 @@ components:
           type: string
           format: date-time
           readOnly: true
-        due_date:
+        dueDate:
           description: Data limite para conclusão
-          type: string
-          format: date
+          oneOf:
+          - type: string
+            format: date
+          - type: "null"
         creator:
           description: ID do usuário criador
           type: string
