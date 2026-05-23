@@ -1,0 +1,594 @@
+openapi: '3.1.1'
+info:
+  title: TaskVault
+  description: |
+    API REST da aplicação TaskVault para gestão de tarefas colaborativas.
+
+  license:
+    name: MIT
+    url: https://github.com/rafaelblumm/taskvault/blob/main/LICENSE
+  version: '0.0.1'
+externalDocs:
+  description: Código-fonte
+  url: https://github.com/rafaelblumm/taskvault
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: Autenticação de contas de usuários
+  - name: user
+    description: Gestão de contas de usuários
+  - name: task
+    description: Gestão de tarefas
+
+paths:
+  /auth/login:
+    get:
+      tags:
+        - auth
+      summary: Autenticação de usuário
+      description: Autentica o usuário na aplicação.
+      security: []
+      
+      parameters:
+        - name: user
+          in: query
+          description: Nome de usuário
+          required: true
+          schema:
+            type: string
+        - name: pass
+          in: query
+          description: Credencial do usuário
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          description: Usuário ou senha inválidos
+        default:
+          description: Erro inesperado
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Desautenticação de usuário
+      description: Desautentica o usuário da aplicação.
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Usuário ou senha inválidos
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: Erro inesperado
+
+  /user:
+    post:
+      tags:
+        - user
+      summary: Criação de usuário
+      description: Cria um novo usuário.
+      requestBody:
+        description: Dados do usuário.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Usuário ou senha inválidos
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        default:
+          description: Erro inesperado
+
+  /user/{username}:
+    parameters:
+      - name: username
+        in: path
+        description: ID do usuário
+        required: true
+        schema:
+          type: string
+          maxLength: 35
+
+    get:
+      tags:
+        - user
+      summary: Busca de usuários
+      description: Busca dados de um usuário.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Usuário não encontrado
+        default:
+          description: Erro inesperado
+    put:
+      tags:
+        - user
+      summary: Atualiza usuário
+      description: Atualiza dados de um usuário.
+      requestBody:
+        description: Dados do usuário a serem atualizados.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '204':
+          description: Usuário atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Usuário ou senha inválidos
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Usuário não encontrado
+        '409':
+          description: Dados conflitantes com outros usuários
+        default:
+          description: Erro inesperado
+    delete:
+      tags:
+        - user
+      summary: Remoção de usuário
+      description: Remove conta de um usuário.
+      responses:
+        '204':
+          description: Usuário removido com sucesso
+        '400':
+          description: Usuário ou senha inválidos
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Usuário não encontrado
+        '409':
+          description: Dados conflitantes com outros usuários
+        default:
+          description: Erro inesperado
+
+  /task:
+    post:
+      tags:
+        - task
+      summary: Criação de tarefa
+      description: Cria uma nova tarefa.
+      requestBody:
+        description: Dados da tarefa.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: Tarefa criada com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        default:
+          description: Erro inesperado
+    get:
+      tags:
+        - task
+      summary: Busca de tarefas
+      description: Busca um registro de tarefa, permitindo informar múltiplos filtros.
+      parameters:
+        - name: titleContains
+          in: query
+          description: Conteúdo parcial do título
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+        - name: status
+          in: query
+          description: Status da tarefa
+          required: false
+          schema:
+            type: string
+            format: TaskStatus
+        - name: createdBy
+          in: query
+          description: ID do usuário criador
+          required: false
+          schema:
+            type: string
+            maxLength: 35
+        - name: assignedTo
+          in: query
+          description: ID do usuário designado para a tarefa
+          required: false
+          schema:
+            type: string
+            maxLength: 35
+        - name: createdBefore
+          in: query
+          description: Data e hora de criação (limite superior)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdAfter
+          in: query
+          description: Data e hora de criação (limite inferior)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: dueBefore
+          in: query
+          description: Data programada para conclusão (limite superior)
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: dueAfter
+          in: query
+          description: Data programada para conclusão (limite inferior)
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        default:
+          description: Erro inesperado
+  /task/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        description: ID da tarefa
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      tags:
+        - task
+      summary: Busca de tarefa
+      description: Busca uma tarefa pelo ID.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+    put:
+      tags:
+        - task
+      summary: Atualização de tarefa
+      description: Atualiza uma tarefa pelo ID.
+      requestBody:
+        description: Dados da tarefa a serem atualizados.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '204':
+          description: Tarefa atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+    delete:
+      tags:
+        - task
+      summary: Remoção de tarefa
+      description: Remove uma tarefa pelo ID.
+      responses:
+        '201':
+          description: Tarefa removida com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+  /task/{taskId}/comment:
+    parameters:
+      - name: taskId
+        in: path
+        description: ID da tarefa
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      tags:
+        - task
+      summary: Listagem de comentários
+      description: Lista todos os comentários de uma tarefa
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+    post:
+      tags:
+        - task
+      summary: Criação de comentário
+      description: Busca todos os comentários de uma tarefa
+      requestBody:
+        description: Mensagem do comentário.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: Comentário criado com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+  /task/{taskId}/comment/{commentId}:
+    parameters:
+      - name: taskId
+        in: path
+        description: ID da tarefa
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: commentId
+        in: path
+        description: ID do comentário
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      tags:
+        - task
+      summary: Busca de comentário
+      description: Busca todos os comentários de uma tarefa
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+    delete:
+      tags:
+        - task
+      summary: Remoção de comentário
+      description: Remove comentário de uma tarefa
+      responses:
+        '201':
+          description: Comentário criado com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/InsufficientRolePermissions'
+        '404':
+          description: Tarefa não encontrada
+        default:
+          description: Erro inesperado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de autenticação por usuário
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          description: ID de usuário (username)
+          type: string
+          format: string
+          maxLength: 35
+          examples: ["admin"]
+        name:
+          description: Nome do usuário
+          type: string
+          format: string
+          maxLength: 150
+          examples: ["Administrador"]
+        email:
+          description: E-mail do usuário
+          type: string
+          format: string
+          maxLength: 254
+          examples: ["sysadmin@dev.com"]
+        role:
+          description: Nível de permissão do usuário
+          type: string
+          format: UserRole
+          examples: ["user"]
+        password:
+          description: Senha do usuário
+          type: string
+          format: password
+          maxLength: 72
+          writeOnly: true
+          examples: ["SuperSecretPassword123"]
+      
+    UserRole:
+      description: Nível de permissão do usuário
+      type: string
+      enum: ["sysadmin", "admin", "user", "guest"]
+    
+    Task:
+      properties:
+        id:
+          description: Identificador único da tarefa
+          type: integer
+          format: int64
+          readOnly: true
+        title:
+          description: Título da tarefa
+          type: string
+          format: string
+          maxLength: 255
+        description:
+          description: Descrição da tarefa
+          type: string
+          format: string
+        status:
+          description: Status de conclusão
+          type: string
+          format: TaskStatus
+        creation:
+          description: Data e hora de criação
+          type: string
+          format: date-time
+          readOnly: true
+        due_date:
+          description: Data limite para conclusão
+          type: string
+          format: date
+        creator:
+          description: ID do usuário criador
+          type: string
+          format: string
+          maxLength: 35
+          readOnly: true
+        assignee:
+          description: ID do usuário designado para a tarefa
+          oneOf:
+          - type: string
+            format: string
+            maxLength: 35
+          - type: "null"
+
+    TaskStatus:
+      description: Status de conclusão da tarefa
+      type: string
+      enum: ["pending", "in_progress", "done"]
+
+    Comment:
+      properties:
+        id:
+          description: Identificador único do comentário
+          type: integer
+          format: int64
+          readOnly: true
+        creator:
+          description: ID do usuário criador
+          type: string
+          format: string
+          maxLength: 35
+          readOnly: true
+        message:
+          description: Mensagem do comentário
+          type: string
+          format: string
+          maxLength: 2000
+        creation:
+          description: Data e hora de criação
+          type: string
+          format: date-time
+          readOnly: true
+
+    AuthToken:
+      properties:
+        token:
+          description: Token JWT do usuário
+          type: string
+          format: jwt
+          readOnly: true
+
+  responses:
+    UnauthorizedError:
+      description: Token de acesso ausente ou inválido
+
+    InsufficientRolePermissions:
+      description: O usuário não possui permissões suficientes para realizar essa operação
