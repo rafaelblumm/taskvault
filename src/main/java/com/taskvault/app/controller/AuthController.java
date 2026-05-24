@@ -1,0 +1,37 @@
+package com.taskvault.app.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.taskvault.app.payload.request.LoginRequest;
+import com.taskvault.app.payload.response.LoginResponse;
+import com.taskvault.app.security.service.UserAuthService;
+
+/** Controller do endpoint de autenticação de usuários */
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    /** Serviço de autenticação de usuários */
+    @Autowired
+    private UserAuthService userAuthService;
+
+    /**
+     * Endpoint de autenticação de usuário
+     * @param loginRequest Dados da requisição
+     * @return Token de usuário
+     */
+    @GetMapping("/login")
+    public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
+        String token = userAuthService.authenticateUser(
+            loginRequest.user(),
+            loginRequest.pass()
+        );
+
+        return new LoginResponse(token);
+    }
+
+}

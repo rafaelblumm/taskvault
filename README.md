@@ -6,6 +6,8 @@ Projeto da disciplina Engenharia de Software III
   - [.env](#env)
   - [secrets/db_password.txt](#secretsdb_passwordtxt)
   - [secrets/db_root_password.txt](#secretsdb_root_passwordtxt)
+  - [secrets/jwt_issuer.txt](#secretsjwt_issuertxt)
+  - [secrets/jwt_key.txt](#secretsjwt_keytxt)
 - [Nota para desenvolvedores](#nota-para-desenvolvedores)
   - [Execução do ambiente Docker](#execução-do-ambiente-docker)
   - [Execução do JAR](#execução-do-jar)
@@ -24,12 +26,13 @@ Docker.
 O arquivo `.env` contém informações não sigilosas de conexão com o banco de dados
 com as seguintes chaves disponíveis:
 
-| Chave      | Descrição                              | Exemplo     | Obrigatório |
-| ---------- | -------------------------------------- | ----------- | ----------- |
-| `DB_HOST`  | Endereço do banco de dados             | _localhost_ | **Sim**     |
-| `DB_PORT`  | Porta do banco de dados                | _3306_      | **Sim**     |
-| `DATABASE` | Nome do schema no banco de dados       | _taskvault_ | **Sim**     |
-| `DB_USER`  | Usuário da aplicação no banco de dados | _appuser_   | **Sim**     |
+| Chave        | Descrição                              | Exemplo     | Obrigatório |
+| ------------ | -------------------------------------- | ----------- | ----------- |
+| `DB_HOST`    | Endereço do banco de dados             | _localhost_ | **Sim**     |
+| `DB_PORT`    | Porta do banco de dados                | _3306_      | **Sim**     |
+| `DATABASE`   | Nome do schema no banco de dados       | _taskvault_ | **Sim**     |
+| `DB_USER`    | Usuário da aplicação no banco de dados | _appuser_   | **Sim**     |
+| `LOG_LEVEL`  | Nível de log da aplicação              | _debug_     | Não         |
 
 Exemplo: [.env.example](docs/.env.example)
 
@@ -53,6 +56,26 @@ Exemplo:
 
 ```plaintext
 SuperSecretRootPassword321
+```
+
+### secrets/jwt_issuer.txt
+
+O arquivo deve conter **SOMENTE** o nome do _issuer_ de tokens JWT.
+
+Exemplo:
+
+```plaintext
+MyJwtIssuer
+```
+
+### secrets/jwt_key.txt
+
+O arquivo deve conter **SOMENTE** a chave de assinatura de tokens JWT.
+
+Exemplo:
+
+```plaintext
+MySuperSecretJwtKey
 ```
 
 ## Nota para desenvolvedores
@@ -93,6 +116,10 @@ spring.datasource.url: jdbc:mysql://localhost:3306/taskvault
 spring.datasource.username: user
 # Senha do usuário do banco de dados
 spring.datasource.password: pass
+# Nome do issuer de JWTs
+app.jwt.issuer: MyTokenIssuer
+# Chave para assinar JWTs
+app.jwt.key: MyTokenKey
 ```
 
 Para executar a aplicação em modo desenvolvimento, basta executar o seguinte
