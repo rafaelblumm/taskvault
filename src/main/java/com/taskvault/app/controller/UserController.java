@@ -1,4 +1,4 @@
-package com.taskvault.app.user;
+package com.taskvault.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.taskvault.app.error.UserAlreadyExistsException;
-import com.taskvault.app.utils.PasswordHasher;
+import com.taskvault.app.model.User;
+import com.taskvault.app.payload.response.UserResponse;
+import com.taskvault.app.repository.UserRepository;
+import com.taskvault.app.security.service.PasswordHasherService;
 
 /** Controller do endpoint de gerenciamento de usuários */
 @RestController
@@ -31,7 +34,7 @@ public class UserController {
             throw new UserAlreadyExistsException();
         }
 
-        user.setPassword(PasswordHasher.hash(user.getPassword()));
+        user.setPassword(PasswordHasherService.hash(user.getPassword()));
         userRepository.save(user);
 
         return UserResponse.from(user);

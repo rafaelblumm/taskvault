@@ -1,8 +1,10 @@
-package com.taskvault.app.user;
+package com.taskvault.app.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
+
+import com.taskvault.app.model.User;
 
 /** Camada de acesso aos dados da tabela de usuários */
 public interface UserRepository extends CrudRepository<User, String> {

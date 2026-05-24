@@ -1,4 +1,4 @@
-package com.taskvault.app.user;
+package com.taskvault.app.model;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
