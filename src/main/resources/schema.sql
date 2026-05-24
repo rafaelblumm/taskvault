@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS taskvault.user (
   id varchar(35) NOT NULL,
   name varchar(150) NOT NULL,
   email varchar(254) NOT NULL,
-  role enum('guest', 'user', 'admin', 'sysadmin') NOT NULL DEFAULT 'guest',
-  password varchar(72) NOT NULL,
+  role enum('GUEST', 'USER', 'ADMIN', 'SYSADMIN') NOT NULL DEFAULT 'GUEST',
+  password varchar(180) NOT NULL,
   deleted_at datetime DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY user_email_unique (email)
