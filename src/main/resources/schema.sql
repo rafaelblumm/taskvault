@@ -1,5 +1,3 @@
-CREATE DATABASE IF NOT EXISTS taskvault;
-
 -- Tabela de usuários
 CREATE TABLE IF NOT EXISTS taskvault.user (
   id varchar(35) NOT NULL,
