@@ -46,8 +46,8 @@ public class UserController {
      * @return Se usuário já existe
      */
     private boolean userExist(User user) {
-        return userRepository.findById(user.getId()).isPresent() ||
-                userRepository.findByEmail(user.getEmail()).isPresent();
+        return userRepository.existsById(user.getId()) ||
+                userRepository.existsByEmail(user.getEmail());
     }
 
 }

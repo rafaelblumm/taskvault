@@ -10,11 +10,10 @@ import com.taskvault.app.model.User;
 public interface UserRepository extends CrudRepository<User, String> {
 
     /**
-     * Busca usuário pelo e-mail (chave única)
-     * @param email E-mail sendo buscado
-     * @return Se houver usuário com o e-mail, retorna {@Code User} encapsulado
-     * em um {@Code Optional}. Se não existir, retorna {@Code Optional.empty}
+     * Identifica se usuário existe pelo e-mail (chave única)
+     * @param email E-mail do usuário
+     * @return Se usuário existe
      */
-    public Optional<User> findByEmail(String email);
+    public boolean existsByEmail(String email);
 
 }
