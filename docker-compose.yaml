@@ -12,6 +12,10 @@ services:
     secrets:
       - source: db_password
         target: /etc/taskvault/spring/datasource/password
+      - source: jwt_issuer
+        target: /etc/taskvault/app/jwt/issuer
+      - source: jwt_key
+        target: /etc/taskvault/app/jwt/key
     depends_on:
       db:
         condition: service_healthy
@@ -38,3 +42,7 @@ secrets:
     file: secrets/db_root_password.txt
   db_password:
     file: secrets/db_password.txt
+  jwt_issuer:
+    file: secrets/jwt_issuer.txt
+  jwt_key:
+    file: secrets/jwt_key.txt
