@@ -1,4 +1,7 @@
-package com.taskvault.app.user;
+package com.taskvault.app.payload.response;
+
+import com.taskvault.app.model.User;
+import com.taskvault.app.model.UserRole;
 
 /**
  * Resposta de requisições que retornam um usuário.

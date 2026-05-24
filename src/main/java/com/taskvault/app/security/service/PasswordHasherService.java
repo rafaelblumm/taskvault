@@ -1,9 +1,9 @@
-package com.taskvault.app.utils;
+package com.taskvault.app.security.service;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 
 /** Classe utilitária para geração de hashes de senhas */
-public class PasswordHasher {
+public class PasswordHasherService {
 
     /** Tamanho do salt para hashing (em bytes) */
     private static int SALT_LENGTH = 32;
