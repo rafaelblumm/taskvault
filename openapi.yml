@@ -31,7 +31,7 @@ paths:
       summary: Autenticação de usuário
       description: Autentica o usuário na aplicação.
       security: []
-      
+
       parameters:
         - name: user
           in: query
@@ -98,6 +98,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/InsufficientRolePermissions'
+        '409':
+          $ref: '#/components/responses/UserAlreadyExists'
         default:
           description: Erro inesperado
 
@@ -154,7 +156,7 @@ paths:
         '404':
           description: Usuário não encontrado
         '409':
-          description: Dados conflitantes com outros usuários
+          $ref: '#/components/responses/UserAlreadyExists'
         default:
           description: Erro inesperado
     delete:
@@ -171,8 +173,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '404':
           description: Usuário não encontrado
-        '409':
-          description: Dados conflitantes com outros usuários
         default:
           description: Erro inesperado
 
@@ -500,12 +500,12 @@ components:
           maxLength: 72
           writeOnly: true
           examples: ["SuperSecretPassword123"]
-      
+
     UserRole:
       description: Nível de permissão do usuário
       type: string
       enum: ["sysadmin", "admin", "user", "guest"]
-    
+
     Task:
       properties:
         id:
@@ -594,3 +594,6 @@ components:
 
     InsufficientRolePermissions:
       description: O usuário não possui permissões suficientes para realizar essa operação
+
+    UserAlreadyExists:
+      description: Dados conflitantes com outros usuários

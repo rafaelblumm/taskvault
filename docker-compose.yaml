@@ -24,7 +24,7 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
     ports:
-      - "33060:3306"
+      - "3306:3306"
     secrets:
       - db_root_password
       - db_password
