@@ -520,8 +520,10 @@ components:
           maxLength: 255
         description:
           description: Descrição da tarefa
-          type: string
-          format: string
+          oneOf:
+          - type: string
+            format: string
+          - type: "null"
         status:
           description: Status de conclusão
           type: string
