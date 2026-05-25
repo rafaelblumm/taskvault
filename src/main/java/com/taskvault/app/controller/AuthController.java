@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.taskvault.app.payload.request.LoginRequest;
 import com.taskvault.app.payload.response.LoginResponse;
-import com.taskvault.app.security.service.UserAuthService;
+import com.taskvault.app.service.AuthService;
 
 /** Controller do endpoint de autenticação de usuários */
 @RestController
@@ -17,7 +17,7 @@ public class AuthController {
 
     /** Serviço de autenticação de usuários */
     @Autowired
-    private UserAuthService userAuthService;
+    private AuthService userAuthService;
 
     /**
      * Endpoint de autenticação de usuário
