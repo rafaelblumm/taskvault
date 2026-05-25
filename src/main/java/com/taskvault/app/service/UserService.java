@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.taskvault.app.error.UserAlreadyExistsException;
+import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.User;
 import com.taskvault.app.repository.UserRepository;
 
@@ -26,10 +27,8 @@ public class UserService {
      * @return Usuário criado
      * @throws UserAlreadyExistsException Se usuário já existir na base de dados
      */
-    public User createUser(User user) throws UserAlreadyExistsException{
-        if (userExist(user)) {
-            throw new UserAlreadyExistsException();
-        }
+    public User createUser(User user) throws UserAlreadyExistsException {
+        if (userExists(user)) throw new UserAlreadyExistsException();
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -37,11 +36,22 @@ public class UserService {
     }
 
     /**
+     * Busca usuário na base de dados
+     * @param username ID do usuário
+     * @return Usuário encontrado
+     * @throws UserNotFoundException Se não encontrar usuário
+     */
+    public User getUser(String username) throws UserNotFoundException {
+        return userRepository.findById(username)
+            .orElseThrow(() -> new UserNotFoundException());
+    }
+
+    /**
      * Verifica se usuário já existe na base de dados. Valida campos chave
      * @param user Usuário
      * @return Se usuário já existe
      */
-    private boolean userExist(User user) {
+    private boolean userExists(User user) {
         return userRepository.existsById(user.getId()) ||
                 userRepository.existsByEmail(user.getEmail());
     }
