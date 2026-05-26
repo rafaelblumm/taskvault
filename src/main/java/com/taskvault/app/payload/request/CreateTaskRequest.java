@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 public record CreateTaskRequest(
     String title,
-    String description,
+    Optional<String> description,
     Optional<LocalDate> dueDate,
     Optional<String> assignee
 ) {}

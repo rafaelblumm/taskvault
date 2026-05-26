@@ -19,7 +19,7 @@ import com.taskvault.app.service.TaskService;
 @RequestMapping("/task")
 public class TaskController {
 
-    /** Acesso a camada de dados de usuários */
+    /** Serviço de gestão de tarefas */
     @Autowired
     private TaskService taskService;
 

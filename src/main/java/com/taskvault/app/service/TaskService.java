@@ -27,7 +27,7 @@ public class TaskService {
     private UserService userService;
 
     /**
-     * Cria novo registro de tarefa
+     * Cria novo registro de tarefa com o usuário corrente como criador
      * @param taskDto Dados da tarefa
      * @return Tarefa criada
      * @throws MissingAuthTokenException Se não for informado usuário
@@ -37,8 +37,20 @@ public class TaskService {
     throws MissingAuthTokenException, UserNotFoundException {
         Authentication auth = SecurityUtils.getAuthenticatedUser()
             .orElseThrow(() -> new MissingAuthTokenException());
+        User creator = userService.getUser(auth.getName());
 
-        var creator = userService.getUser(auth.getName());
+        return createTask(taskDto, creator);
+    }
+
+    /**
+     * Cria novo registro de tarefa
+     * @param taskDto Dados da tarefa
+     * @param user Usuário criador da tarefa
+     * @return Tarefa criada
+     * @throws UserNotFoundException Se IDs de usuários não existirem
+     */
+    protected Task createTask(CreateTaskRequest taskDto, User creator)
+    throws UserNotFoundException {
         Optional<User> assignee = taskDto.assignee()
             .map((id) -> userService.getUser(id));
         var task = new Task(taskDto, creator, assignee);

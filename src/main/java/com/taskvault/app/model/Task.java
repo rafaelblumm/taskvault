@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.taskvault.app.payload.request.CreateTaskRequest;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,6 +30,7 @@ public class Task {
     private String title;
 
     /** Descrição da tarefa */
+    @Nullable
     private String description;
 
     /** Status da tarefa */
@@ -39,6 +41,7 @@ public class Task {
     private LocalDateTime creationDatetime;
 
     /** Data prevista para conclusão */
+    @Nullable
     private LocalDate dueDate;
 
     /** Usuário criador da tarefa */
@@ -49,10 +52,15 @@ public class Task {
     /** ID do usuário designado para a tarefa */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = true)
+    @Nullable
     private User assignee;
 
     /** Data de remoção da tarefa */
+    @Nullable
     private LocalDateTime deletedAt;
+
+    /** Construtor padrão */
+    public Task() {}
 
     /**
      * Cria nova instância com dados padrões a partir de DTO
@@ -62,7 +70,7 @@ public class Task {
     public Task(CreateTaskRequest taskDto, User creator, Optional<User> assignee) {
         this.id = 0;
         this.title = taskDto.title();
-        this.description = taskDto.description();
+        this.description = taskDto.description().orElse(null);
         this.status = TaskStatus.PENDING;
         this.creationDatetime = LocalDateTime.now();
         this.dueDate = taskDto.dueDate().orElse(null);

@@ -24,6 +24,14 @@ public class UserDetailsImpl implements UserDetails {
         this.user = user;
     }
 
+    /**
+     * Retorna usuário
+     * @return Usuário
+     */
+    public User getUser() {
+        return this.user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(user.getRole().toString()));
