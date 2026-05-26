@@ -3,6 +3,7 @@ package com.taskvault.app.model;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,7 +25,28 @@ public class User {
     /** Senha do usuário */
     private String password;
     /** Data e hora de remoção do usuário */
+    @Nullable
     private LocalDateTime deletedAt;
+
+    /** Construtor padrão */
+    public User() {}
+
+    /**
+     * Cria novo usuário
+     * @param id ID de usuário
+     * @param name Nome
+     * @param email Endereço de e-mail
+     * @param role Nível de permissão
+     * @param password Senha
+     */
+    public User(String id, String name, String email, UserRole role, String password) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+        this.deletedAt = null;
+    }
 
     /**
      * Busca ID do usuário
@@ -121,6 +143,36 @@ public class User {
      */
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof User))
+            return false;
+
+        var o = (User) obj;
+        return getId() == o.getId() &&
+            getName() == o.getName() &&
+            getEmail() == o.getEmail() &&
+            getRole() == o.getRole() &&
+            getPassword() == o.getPassword() &&
+            getDeletedAt() == o.getDeletedAt();
+    }
+
+    @Override
+    public String toString() {
+        var deletionStr = getDeletedAt()
+            .map((datetime) -> datetime.toString())
+            .orElse("");
+        var sb = new StringBuilder();
+        sb.append("Id.......: ").append(getId())
+            .append("\nName.....: ").append(getName())
+            .append("\nEmail....: ").append(getEmail())
+            .append("\nRole.....: ").append(getRole())
+            .append("\nPassword.: ").append(getPassword())
+            .append("\nDeletedAt: ").append(deletionStr);
+
+        return sb.toString();
     }
 
 }
