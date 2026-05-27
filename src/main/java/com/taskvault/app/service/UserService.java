@@ -53,7 +53,7 @@ public class UserService {
 
         userFromDataBase.setName(updateUser.getName());
         userFromDataBase.setEmail(updateUser.getEmail());
-        userFromDataBase.setPassword(updateUser.getPassword());
+        userFromDataBase.setPassword(passwordEncoder.encode(updateUser.getPassword()));
         userFromDataBase.setRole(updateUser.getRole());
 
         userRepository.save(userFromDataBase);
