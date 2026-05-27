@@ -1,5 +1,6 @@
 package com.taskvault.app.controller;
 
+import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +38,16 @@ public class UserController {
     @ResponseStatus(code = HttpStatus.OK)
     public UserResponse findUser(@PathVariable ("username") String username) { return UserResponse.from(userService.getUser(username)); }
 
+    /**
+     * Atualiza informações de um usuário
+     * @param username Nome de usuário a ser alterado
+     * @param updateUser Dados alterados do usuário
+     */
+    @PutMapping("/{username}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void updateUser(@PathVariable ("username") String username,
+                           @RequestBody UpdateUserRequest updateUser) {
+        userService.updateUser(userService.getUser(username), updateUser);
+    }
 
 }
