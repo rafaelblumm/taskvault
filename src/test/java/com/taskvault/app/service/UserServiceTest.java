@@ -1,11 +1,11 @@
 package com.taskvault.app.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.taskvault.app.model.User;
 import com.taskvault.app.model.UserRole;
 import com.taskvault.app.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 /** Testes da classe de gestão de usuários */
 @ExtendWith(MockitoExtension.class)
@@ -50,4 +53,63 @@ public class UserServiceTest {
         assertEquals(user, createdUser);
     }
 
+    /** Testa atualização de usuário **/
+    @Test
+    public void updateUserTest() {
+        var userFromDatabase = new User(
+                "teste",
+                "Usuário Teste",
+                "teste@dev.com",
+                UserRole.GUEST,
+                "SuperSecretPassword123"
+        );
+
+        var updatedUser = new UpdateUserRequest(
+                "testeAtualizado",
+                "testeAtualizado@dev.com",
+                "SenhaAtualizada",
+                UserRole.GUEST
+        );
+
+        userService.updateUser(userFromDatabase, updatedUser);
+
+        assertEquals(userFromDatabase.getName(), updatedUser.getName());
+        assertEquals(userFromDatabase.getEmail(), updatedUser.getEmail());
+        assertEquals(userFromDatabase.getPassword(), passwordEncoder.encode(updatedUser.getPassword()));
+        assertEquals(userFromDatabase.getRole(), updatedUser.getRole());
+    }
+
+    /** Testa procura de usuário **/
+    @Test
+    public void getUserTest() {
+        var user = new User(
+                "teste",
+                "Usuário Teste",
+                "teste@dev.com",
+                UserRole.GUEST,
+                "SuperSecretPassword123"
+        );
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        assertEquals(userService.getUser(user.getId()), user);
+    }
+
+    /** Testa deleção de usuário **/
+    @Test
+    public void deleteUserTest() {
+        var user = new User(
+                "teste",
+                "Usuário Teste",
+                "teste@dev.com",
+                UserRole.GUEST,
+                "SuperSecretPassword123"
+        );
+
+        // Evita erro de milissegundos comparando se a data é após o início do teste
+        LocalDateTime antesDaDelecao = LocalDateTime.now().minusSeconds(1);
+        userService.deleteUser(user);
+
+        assertTrue(user.getDeletedAt().get().isAfter(antesDaDelecao));
+    }
 }
