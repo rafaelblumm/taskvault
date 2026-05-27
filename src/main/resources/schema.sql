@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS taskvault.task (
   id bigint unsigned NOT NULL AUTO_INCREMENT,
   title tinytext NOT NULL,
   description text,
-  status enum('pending','in_progress','done') NOT NULL DEFAULT 'pending',
+  status enum('PENDING','IN_PROGRESS','DONE') NOT NULL DEFAULT 'PENDING',
   creation_datetime datetime NOT NULL,
   due_date date DEFAULT NULL,
   creator_id varchar(35) NOT NULL,
