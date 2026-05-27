@@ -1,10 +1,9 @@
 package com.taskvault.app.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.junit.jupiter.api.Test;
@@ -107,8 +106,10 @@ public class UserServiceTest {
                 "SuperSecretPassword123"
         );
 
+        // Evita erro de milissegundos comparando se a data é após o início do teste
+        LocalDateTime antesDaDelecao = LocalDateTime.now().minusSeconds(1);
         userService.deleteUser(user);
 
-        assertEquals(user.getDeletedAt().orElseThrow(), LocalDateTime.from(LocalDateTime.now()));
+        assertTrue(user.getDeletedAt().get().isAfter(antesDaDelecao));
     }
 }
