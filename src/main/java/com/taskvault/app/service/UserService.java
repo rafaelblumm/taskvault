@@ -1,5 +1,6 @@
 package com.taskvault.app.service;
 
+import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,8 @@ import com.taskvault.app.error.UserAlreadyExistsException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.User;
 import com.taskvault.app.repository.UserRepository;
+
+import java.util.Objects;
 
 /** Serviço de gestão de usuários */
 @Service
@@ -33,6 +36,24 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
+    }
+
+    /**
+     * Atualiza informações de um usuário
+     * @param userFromDataBase Usuário a ser alterado
+     * @param updateUser Dados alterados do usuário
+     */
+    public void updateUser(User userFromDataBase,
+                           UpdateUserRequest updateUser) throws UserNotFoundException {
+        if (userRepository.existsByEmail(updateUser.getEmail()) &&
+                !Objects.equals(updateUser.getEmail(), userFromDataBase.getEmail())) throw new UserAlreadyExistsException();
+
+        userFromDataBase.setName(updateUser.getName());
+        userFromDataBase.setEmail(updateUser.getEmail());
+        userFromDataBase.setPassword(updateUser.getPassword());
+        userFromDataBase.setRole(updateUser.getRole());
+
+        userRepository.save(userFromDataBase);
     }
 
     /**
