@@ -10,7 +10,9 @@ import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.User;
 import com.taskvault.app.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Serviço de gestão de usuários */
 @Service
@@ -47,6 +49,7 @@ public class UserService {
                            UpdateUserRequest updateUser) throws UserNotFoundException {
         if (userRepository.existsByEmail(updateUser.getEmail()) &&
                 !Objects.equals(updateUser.getEmail(), userFromDataBase.getEmail())) throw new UserAlreadyExistsException();
+        if (userFromDataBase.getDeletedAt().isPresent()) throw new UserNotFoundException();
 
         userFromDataBase.setName(updateUser.getName());
         userFromDataBase.setEmail(updateUser.getEmail());
@@ -63,8 +66,22 @@ public class UserService {
      * @throws UserNotFoundException Se não encontrar usuário
      */
     public User getUser(String username) throws UserNotFoundException {
-        return userRepository.findById(username)
-            .orElseThrow(() -> new UserNotFoundException());
+        User user = userRepository.findById(username)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (user.getDeletedAt().isPresent()) throw new UserNotFoundException();
+
+        return user;
+    }
+
+    /**
+     * Deleta usuário
+     * @param user Usuário
+     */
+    public void deleteUser(User user) throws UserNotFoundException {
+        user.setDeletedAt(LocalDateTime.from(LocalDateTime.now()));
+
+        userRepository.save(user);
     }
 
     /**

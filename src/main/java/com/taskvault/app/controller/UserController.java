@@ -50,4 +50,8 @@ public class UserController {
         userService.updateUser(userService.getUser(username), updateUser);
     }
 
+    @DeleteMapping("/{username}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable ("username") String username) { userService.deleteUser(userService.getUser(username)); }
+
 }
