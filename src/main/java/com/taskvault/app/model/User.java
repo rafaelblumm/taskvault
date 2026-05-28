@@ -8,8 +8,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "app_user")
 public class User {
 
     /** Identificador único de usuário */
@@ -147,16 +149,15 @@ public class User {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof User))
-            return false;
+        if (!(obj instanceof User)) return false;
 
         var o = (User) obj;
-        return getId() == o.getId() &&
-            getName() == o.getName() &&
-            getEmail() == o.getEmail() &&
-            getRole() == o.getRole() &&
-            getPassword() == o.getPassword() &&
-            getDeletedAt() == o.getDeletedAt();
+        return getId().equals(o.getId()) &&
+            getName().equals(o.getName()) &&
+            getEmail().equals(o.getEmail()) &&
+            getRole().equals(o.getRole()) &&
+            getPassword().equals(o.getPassword()) &&
+            getDeletedAt().equals(o.getDeletedAt());
     }
 
     @Override
