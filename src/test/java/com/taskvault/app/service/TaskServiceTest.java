@@ -80,6 +80,7 @@ public class TaskServiceTest {
         task.setTitle("Tarefa teste");
         task.setDescription(null);
         task.setStatus(TaskStatus.IN_PROGRESS);
+        task.setCreationDatetime(LocalDateTime.now());
         task.setDueDate(null);
         task.setCreator(creator);
         task.setAssignee(assignee);
@@ -89,9 +90,7 @@ public class TaskServiceTest {
             .thenReturn(task);
         when(userRepository.findById(assignee.getId()))
             .thenReturn(Optional.of(assignee));
-
         var createdTask = taskService.createTask(taskDto, creator);
-        createdTask.setDueDate(null);
 
         verify(taskRepository).save(ArgumentMatchers.any());
 
@@ -113,6 +112,7 @@ public class TaskServiceTest {
         task.setTitle("Tarefa teste");
         task.setDescription(null);
         task.setStatus(TaskStatus.IN_PROGRESS);
+        task.setCreationDatetime(LocalDateTime.now());
         task.setDueDate(null);
         task.setCreator(creator);
         task.setDeletedAt(null);
@@ -158,6 +158,7 @@ public class TaskServiceTest {
         task.setCreationDatetime(LocalDateTime.now());
         task.setCreator(SAMPLE_USERS.get(0));
         task.setStatus(TaskStatus.IN_PROGRESS);
+        task.setCreationDatetime(LocalDateTime.now());
         task.setDueDate(null);
         task.setDeletedAt(null);
         var assignee = SAMPLE_USERS.get(1);
@@ -182,6 +183,7 @@ public class TaskServiceTest {
         task.setCreationDatetime(LocalDateTime.now());
         task.setCreator(SAMPLE_USERS.get(0));
         task.setStatus(TaskStatus.IN_PROGRESS);
+        task.setCreationDatetime(LocalDateTime.now());
         task.setDueDate(null);
         task.setDeletedAt(null);
         var assignee = SAMPLE_USERS.get(1);

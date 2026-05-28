@@ -26,7 +26,7 @@ import com.taskvault.app.security.service.UserDetailsServiceImpl;
 public class SecurityConfig {
 
     /** Endpoints que não necessitam de autenticação */
-    public static final Set<String> AUTH_NOT_REQUIRED = new HashSet<>(Set.of("/auth/login"));
+    public static final Set<String> AUTH_NOT_REQUIRED = new HashSet<>(Set.of("/auth/login", "/error"));
 
     /** Filtro de autenticação de token de usuário */
     @Autowired
