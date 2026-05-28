@@ -45,12 +45,22 @@ public class UserServiceTest {
             "SuperSecretPassword123"
         );
 
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        String encodedPassword = user.getPassword() + "[encoded]";
+        var expected = new User(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getRole(),
+            encodedPassword
+        );
+
+        when(passwordEncoder.encode(user.getPassword())).thenReturn(encodedPassword);
+        when(userRepository.save(any(User.class))).thenReturn(expected);
         var createdUser = userService.createUser(user);
 
         verify(userRepository, times(1)).save(ArgumentMatchers.any());
 
-        assertEquals(user, createdUser);
+        assertEquals(expected, createdUser);
     }
 
     /** Testa atualização de usuário **/

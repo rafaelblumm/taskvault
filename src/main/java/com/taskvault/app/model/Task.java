@@ -223,4 +223,36 @@ public class Task {
         this.deletedAt = deletedAt;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Task)) return false;
+
+        var o = (Task) obj;
+        return getId() == o.getId() &&
+            getTitle().equals(o.getTitle()) &&
+            getDescription().equals(o.getDescription()) &&
+            getStatus().equals(o.getStatus()) &&
+            getCreationDatetime().equals(o.getCreationDatetime()) &&
+            getDueDate().equals(o.getDueDate()) &&
+            getCreator().equals(o.getCreator()) &&
+            getAssignee().equals(o.getAssignee()) &&
+            getDeletedAt().equals(o.getDeletedAt());
+    }
+
+    @Override
+    public String toString() {
+        var sb = new StringBuilder();
+        sb.append("Id..............: ").append(getId())
+            .append("\nTitle...........: ").append(getTitle())
+            .append("\nDescription.....: ").append(getDescription())
+            .append("\nStatus..........: ").append(getStatus())
+            .append("\nCreationDatetime: ").append(getCreationDatetime())
+            .append("\nDueDate.........: ").append(getDueDate())
+            .append("\nCreator.........: ").append(getCreator())
+            .append("\nAssignee........: ").append(getAssignee())
+            .append("\nDeletedAt.......: ").append(getDeletedAt());
+
+        return sb.toString();
+    }
+
 }
