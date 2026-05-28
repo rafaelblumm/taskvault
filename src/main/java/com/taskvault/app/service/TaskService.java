@@ -2,6 +2,7 @@ package com.taskvault.app.service;
 
 import java.util.Optional;
 
+import org.hibernate.type.descriptor.java.BigIntegerJavaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,15 @@ public class TaskService {
             task.setAssignee(null);
 
         return taskRepository.save(task);
+    }
+
+    /**
+     * Busca tarefa a partir do ID informado
+     * @param id Id da tarefa
+     * @return tarefa encontrada
+     */
+    public Task getTask(long id) {
+        return taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
     }
 
     /**
