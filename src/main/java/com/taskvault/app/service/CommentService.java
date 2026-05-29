@@ -1,0 +1,51 @@
+package com.taskvault.app.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+
+import com.taskvault.app.error.MissingAuthTokenException;
+import com.taskvault.app.error.TaskNotFoundException;
+import com.taskvault.app.model.Comment;
+import com.taskvault.app.model.Task;
+import com.taskvault.app.model.User;
+import com.taskvault.app.payload.request.CommentRequest;
+import com.taskvault.app.repository.CommentRepository;
+import com.taskvault.app.security.SecurityUtils;
+
+/** Serviço de gerenciamento de comentários em tarefas */
+@Service
+public class CommentService {
+
+    /** Acesso a camada de dados de comentários */
+    @Autowired
+    private CommentRepository commentRepository;
+
+    /** Serviço de gerenciamento de usuários */
+    @Autowired
+    private UserService userService;
+
+    /** Serviço de gerenciamento de tarefas */
+    @Autowired
+    private TaskService taskService;
+
+    /**
+     * Cria nova tarefa
+     * @param commentDto Dados da tarefa
+     * @param taskId ID da tarefa
+     * @return Tarefa criada
+     * @throws MissingAuthTokenException
+     * @throws TaskNotFoundException Se não encontrar tarefa
+     */
+    public Comment createComment(CommentRequest commentDto, long taskId)
+    throws MissingAuthTokenException, TaskNotFoundException {
+        Authentication auth = SecurityUtils.getAuthenticatedUser()
+            .orElseThrow(MissingAuthTokenException::new);
+        User creator = userService.getUser(auth.getName());
+        Task task = taskService.getTask(taskId);
+        var comment = new Comment(task, creator, commentDto.message());
+
+        return commentRepository.save(comment);
+    }
+
+}

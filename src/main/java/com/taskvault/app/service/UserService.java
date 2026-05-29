@@ -12,7 +12,6 @@ import com.taskvault.app.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 /** Serviço de gestão de usuários */
 @Service

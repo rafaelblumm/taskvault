@@ -52,11 +52,11 @@ public class TaskRepositoryIT {
         task.setCreationDatetime(now);
         task.setCreator(creator);
         task.setAssignee(assignee);
-        taskRepository.save(task);
-        Optional<Task> createdTask = taskRepository.findById((long) 1);
+        long taskId = taskRepository.save(task).getId();
+        Optional<Task> result = taskRepository.findById(taskId);
 
         var expected = new Task();
-        expected.setId(1);
+        expected.setId(taskId);
         expected.setTitle("Tarefa teste");
         expected.setDescription(null);
         expected.setStatus(TaskStatus.PENDING);
@@ -65,8 +65,8 @@ public class TaskRepositoryIT {
         expected.setCreator(creator);
         expected.setAssignee(assignee);
         expected.setDeletedAt(null);
-        assertTrue(createdTask.isPresent());
-        assertEquals(expected, createdTask.get());
+        assertTrue(result.isPresent());
+        assertEquals(expected, result.get());
     }
 
 }
