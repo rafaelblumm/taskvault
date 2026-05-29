@@ -1,5 +1,7 @@
 package com.taskvault.app.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,18 @@ public class CommentService {
         var comment = new Comment(task, creator, commentDto.message());
 
         return commentRepository.save(comment);
+    }
+
+    /**
+     * Lista comentários de uma tarefa
+     * @param taskId ID da tarefa
+     * @return Lista de comentários
+     * @throws TaskNotFoundException Se não encontrar tarefa
+     */
+    public List<Comment> listComments(long taskId) throws TaskNotFoundException {
+        if (!taskService.taskExists(taskId)) throw new TaskNotFoundException();
+
+        return commentRepository.findAllByTaskIdOrderByCreationDatetimeAsc(taskId);
     }
 
 }
