@@ -1,7 +1,10 @@
 package com.taskvault.app.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +27,7 @@ public class CommentController {
     private CommentService commentService;
 
     /**
-     *  Cria novo comentário em tarefa
+     * Cria novo comentário em tarefa
      * @param taskId ID da tarefa comentada
      * @param comment Dados da requisição de criação de comentário
      * @return Comentário criado
@@ -37,6 +40,21 @@ public class CommentController {
         @RequestBody CommentRequest comment
     ) throws TaskNotFoundException {
         return CommentResponse.from(commentService.createComment(comment, taskId));
+    }
+
+    /**
+     * Lista comentários em uma tarefa
+     * @param taskId ID da tarefa
+     * @return Lista de comentários
+     * @throws TaskNotFoundException Se tarefa não existir
+     */
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    public List<CommentResponse> listComments(@PathVariable long taskId) throws TaskNotFoundException {
+        return commentService.listComments(taskId)
+            .stream()
+            .map(CommentResponse::from)
+            .toList();
     }
 
 }
