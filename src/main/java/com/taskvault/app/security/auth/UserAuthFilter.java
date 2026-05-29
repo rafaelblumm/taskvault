@@ -72,15 +72,15 @@ public class UserAuthFilter extends OncePerRequestFilter {
         String username;
         try {
             username = getUserToken(request)
-                .map(token -> jwtService.getUsername(token))
-                .orElseThrow(() -> new MissingAuthTokenException());
+                .map(jwtService::getUsername)
+                .orElseThrow(MissingAuthTokenException::new);
         } catch (JWTVerificationException e) {
             throw new InvalidTokenException("Token inválido");
         }
 
         UserDetailsImpl userDetails = userRepository.findById(username)
-            .map(user -> new UserDetailsImpl(user))
-            .orElseThrow(() -> new UserNotFoundException());
+            .map(UserDetailsImpl::new)
+            .orElseThrow(UserNotFoundException::new);
 
         return userDetails;
     }

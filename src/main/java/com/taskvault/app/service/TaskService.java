@@ -37,8 +37,7 @@ public class TaskService {
      */
     public Task createTask(CreateTaskRequest taskDto)
     throws MissingAuthTokenException, UserNotFoundException {
-        Authentication auth = SecurityUtils.getAuthenticatedUser()
-            .orElseThrow(() -> new MissingAuthTokenException());
+        Authentication auth = SecurityUtils.getAuthenticatedUser().orElseThrow(MissingAuthTokenException::new);
         User creator = userService.getUser(auth.getName());
 
         return createTask(taskDto, creator);
@@ -66,15 +65,14 @@ public class TaskService {
      */
     public Task updateTask(long taskId, UpdateTaskRequest taskDto)
     throws TaskNotFoundException, UserNotFoundException {
-        Task task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new TaskNotFoundException());
+        Task task = taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new);
 
         task.setTitle(taskDto.title());
         task.setDescription(taskDto.description().orElse(null));
         task.setStatus(taskDto.status());
         task.setDueDate(taskDto.dueDate().orElse(null));
         if (taskDto.assignee().isPresent())
-            getUserFromDto(taskDto).ifPresent((assignee) -> task.setAssignee(assignee));
+            getUserFromDto(taskDto).ifPresent(task::setAssignee);
         else
             task.setAssignee(null);
 
@@ -106,7 +104,7 @@ public class TaskService {
      */
     private Optional<User> getUserFromDto(CreateTaskRequest taskDto)
     throws UserNotFoundException {
-        return taskDto.assignee().map((id) -> userService.getUser(id));
+        return taskDto.assignee().map(userService::getUser);
     }
 
     /**
@@ -116,7 +114,7 @@ public class TaskService {
      */
     private Optional<User> getUserFromDto(UpdateTaskRequest taskDto)
     throws UserNotFoundException {
-        return taskDto.assignee().map((id) -> userService.getUser(id));
+        return taskDto.assignee().map(userService::getUser);
     }
 
 }
