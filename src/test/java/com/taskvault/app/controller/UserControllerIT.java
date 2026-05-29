@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.taskvault.app.model.User;
 import com.taskvault.app.model.UserRole;
+import com.taskvault.app.payload.request.CreateUserRequest;
 import com.taskvault.app.payload.response.UserResponse;
 import com.taskvault.app.repository.UserRepository;
 
@@ -33,18 +34,18 @@ public class UserControllerIT extends AuthenticatedControllerIT {
     /** Testa criação de novo usuário e tentativas de criação de usuários já existentes */
     @Test
     public void createUserTest() {
-        var user = new User(
+        var user = new CreateUserRequest(
             "johndoe",
             "John Doe",
             "johndoe@enterprise.com",
-            UserRole.USER,
-            "My!P4ssw0rd"
+            "My!P4ssw0rd",
+            UserRole.USER
         );
         var expectedResponse = new UserResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole()
+            user.id(),
+            user.name(),
+            user.email(),
+            user.role()
         );
         getClient().post()
             .uri("/user")
@@ -56,19 +57,19 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             .expectBody(UserResponse.class)
             .consumeWith((result) -> assertEquals(expectedResponse, result.getResponseBody()));
 
-        Optional<User> createdUserOpt = userRepository.findById(user.getId());
+        Optional<User> createdUserOpt = userRepository.findById(user.id());
         assertTrue(createdUserOpt.isPresent());
 
         User createdUser = createdUserOpt.get();
-        assertEquals(user.getId(), createdUser.getId());
-        assertEquals(user.getName(), createdUser.getName());
-        assertEquals(user.getEmail(), createdUser.getEmail());
-        assertEquals(user.getRole(), createdUser.getRole());
-        assertNotEquals(user.getPassword(), createdUser.getPassword());
-        assertTrue(passwordEncoder.matches(user.getPassword(), createdUser.getPassword()));
+        assertEquals(user.id(), createdUser.getId());
+        assertEquals(user.name(), createdUser.getName());
+        assertEquals(user.email(), createdUser.getEmail());
+        assertEquals(user.role(), createdUser.getRole());
+        assertNotEquals(user.password(), createdUser.getPassword());
+        assertTrue(passwordEncoder.matches(user.password(), createdUser.getPassword()));
 
         var duplicatedUsername = new User(
-            user.getId(),
+            user.id(),
             "Same Username",
             "sameusername@dev.com",
             UserRole.USER,
@@ -84,7 +85,7 @@ public class UserControllerIT extends AuthenticatedControllerIT {
         var duplicatedEmail = new User(
             "newid",
             "Same Email",
-            user.getEmail(),
+            user.email(),
             UserRole.USER,
             "passwd"
         );
@@ -94,6 +95,40 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             .body(duplicatedEmail)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    /** Testa remoção de usuário */
+    @Test
+    public void deleteUserTest() {
+        var user = new CreateUserRequest(
+            "johndoeivy",
+            "John Doe Ivy",
+            "johndoeivy@enterprise.com",
+            "My!P4ssw0rd",
+            UserRole.USER
+        );
+        getClient().post()
+            .uri("/user")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .body(user)
+            .exchange();
+
+        getClient().delete()
+            .uri("/user/johndoeivy")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.NO_CONTENT);
+        assertTrue(userRepository.findById("johndoeivy").isEmpty());
+    }
+
+    /** Testa remoção de usuário inexistente */
+    @Test
+    public void deleteInexistentUserTest() {
+        getClient().delete()
+            .uri("/user/inexistent")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
     }
 
 }

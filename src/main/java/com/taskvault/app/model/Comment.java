@@ -3,6 +3,8 @@ package com.taskvault.app.model;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 
 /** Comentário em tarefas */
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 public class Comment {
 
     /** Identificador único */

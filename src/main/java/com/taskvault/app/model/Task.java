@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.taskvault.app.payload.request.CreateTaskRequest;
 
 import jakarta.annotation.Nullable;
@@ -19,6 +21,7 @@ import jakarta.persistence.ManyToOne;
 
 /** Registro de tarefa */
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 public class Task {
 
     /** Identificador único */

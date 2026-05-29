@@ -69,11 +69,7 @@ public class UserService {
      * @throws UserNotFoundException Se não encontrar usuário
      */
     public User getUser(String username) throws UserNotFoundException {
-        User user = userRepository.findById(username).orElseThrow(UserNotFoundException::new);
-
-        if (user.getDeletedAt().isPresent()) throw new UserNotFoundException();
-
-        return user;
+        return userRepository.findById(username).orElseThrow(UserNotFoundException::new);
     }
 
     /**
