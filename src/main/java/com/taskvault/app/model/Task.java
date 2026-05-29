@@ -63,6 +63,24 @@ public class Task {
     public Task() {}
 
     /**
+     * Cria nova tarefa
+     * @param title Título da tarefa
+     * @param creator Criador da tarefa
+     * @param status Status
+     */
+    public Task(String title, User creator, TaskStatus status) {
+        this.id = 0;
+        this.title = title;
+        this.description = null;
+        this.status = status;
+        this.creationDatetime = LocalDateTime.now();
+        this.dueDate = null;
+        this.creator = creator;
+        this.assignee = null;
+        this.deletedAt = null;
+    }
+
+    /**
      * Cria nova instância com dados padrões a partir de DTO
      * @param taskDto DTO de tarefa
      * @param creator Usuário criador

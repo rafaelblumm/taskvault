@@ -6,57 +6,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.client.RestTestClient;
-
 import com.taskvault.app.model.User;
 import com.taskvault.app.model.UserRole;
-import com.taskvault.app.payload.request.LoginRequest;
-import com.taskvault.app.payload.response.LoginResponse;
 import com.taskvault.app.payload.response.UserResponse;
 import com.taskvault.app.repository.UserRepository;
 
+/** Testes de integração dos endpoints de gestão de usuários */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class UserControllerIT {
+public class UserControllerIT extends AuthenticatedControllerIT {
 
-    @LocalServerPort
-    private int port;
-
+    /** Acesso a camada de persistência de dados de usuários */
     @Autowired
     private UserRepository userRepository;
 
+    /** Codificador de senhas */
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    /** Client utilizado para realizar requisições HTTP */
-    private RestTestClient client;
-    /** Token de autenticação com usuário de teste */
-    private String authToken;
-
-    /** Configura client e recupera token de autenticação para realizar testes */
-    @BeforeEach
-    public void setup() {
-        client = RestTestClient.bindToServer()
-            .baseUrl("http://localhost:" + port)
-            .build();
-
-        authToken = client.method(HttpMethod.GET)
-            .uri("/auth/login")
-            .body(new LoginRequest("testuser", "integr4tionT&st"))
-            .exchange()
-            .returnResult(LoginResponse.class)
-            .getResponseBody()
-            .token();
-    }
 
     /** Testa criação de novo usuário e tentativas de criação de usuários já existentes */
     @Test
@@ -74,9 +46,9 @@ public class UserControllerIT {
             user.getEmail(),
             user.getRole()
         );
-        client.post()
+        getClient().post()
             .uri("/user")
-            .headers((headers) -> headers.setBearerAuth(authToken))
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
             .accept(MediaType.APPLICATION_JSON)
             .body(user)
             .exchange()
@@ -102,9 +74,9 @@ public class UserControllerIT {
             UserRole.USER,
             "passwd"
         );
-        client.post()
+        getClient().post()
             .uri("/user")
-            .headers((headers) -> headers.setBearerAuth(authToken))
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
             .body(duplicatedUsername)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
@@ -116,9 +88,9 @@ public class UserControllerIT {
             UserRole.USER,
             "passwd"
         );
-        client.post()
+        getClient().post()
             .uri("/user")
-            .headers((headers) -> headers.setBearerAuth(authToken))
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
             .body(duplicatedEmail)
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.CONFLICT);
