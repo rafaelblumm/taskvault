@@ -3,6 +3,8 @@ package com.taskvault.app.model;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.taskvault.app.payload.request.CreateUserRequest;
 
 import jakarta.annotation.Nullable;
@@ -14,6 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "app_user")
+@SQLRestriction("deleted_at IS NULL")
 public class User {
 
     /** Identificador único de usuário */
