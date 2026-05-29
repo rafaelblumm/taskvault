@@ -1,5 +1,6 @@
 package com.taskvault.app.service;
 
+import com.taskvault.app.payload.request.CreateUserRequest;
 import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,7 +12,6 @@ import com.taskvault.app.model.User;
 import com.taskvault.app.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /** Serviço de gestão de usuários */
 @Service
@@ -31,9 +31,11 @@ public class UserService {
      * @return Usuário criado
      * @throws UserAlreadyExistsException Se usuário já existir na base de dados
      */
-    public User createUser(User user) throws UserAlreadyExistsException {
-        if (userExists(user)) throw new UserAlreadyExistsException();
+    public User createUser(CreateUserRequest userDto) throws UserAlreadyExistsException {
+        if (userRepository.existsByIdOrEmail(userDto.id(), userDto.email()))
+            throw new UserAlreadyExistsException();
 
+        var user = new User(userDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
@@ -43,19 +45,21 @@ public class UserService {
      * Atualiza informações de um usuário
      * @param userFromDataBase Usuário a ser alterado
      * @param updateUser Dados alterados do usuário
+     * @throws UserNotFoundException Usuário não encontrado
+     * @throws UserAlreadyExistsException Dados alterados conflitam com outro usuário
      */
-    public void updateUser(User userFromDataBase,
-                           UpdateUserRequest updateUser) throws UserNotFoundException {
-        if (userRepository.existsByEmail(updateUser.getEmail()) &&
-                !Objects.equals(updateUser.getEmail(), userFromDataBase.getEmail())) throw new UserAlreadyExistsException();
-        if (userFromDataBase.getDeletedAt().isPresent()) throw new UserNotFoundException();
+    public User updateUser(String username, UpdateUserRequest userDto)
+    throws UserNotFoundException, UserAlreadyExistsException {
+        User user = getUser(username);
+        if (!user.getEmail().equals(userDto.email()) && userRepository.existsByEmail(userDto.email()))
+            throw new UserAlreadyExistsException();
 
-        userFromDataBase.setName(updateUser.getName());
-        userFromDataBase.setEmail(updateUser.getEmail());
-        userFromDataBase.setPassword(passwordEncoder.encode(updateUser.getPassword()));
-        userFromDataBase.setRole(updateUser.getRole());
+        user.setName(userDto.name());
+        user.setEmail(userDto.email());
+        user.setPassword(passwordEncoder.encode(userDto.password()));
+        user.setRole(userDto.role());
 
-        userRepository.save(userFromDataBase);
+        return userRepository.save(user);
     }
 
     /**
@@ -65,8 +69,7 @@ public class UserService {
      * @throws UserNotFoundException Se não encontrar usuário
      */
     public User getUser(String username) throws UserNotFoundException {
-        User user = userRepository.findById(username)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findById(username).orElseThrow(UserNotFoundException::new);
 
         if (user.getDeletedAt().isPresent()) throw new UserNotFoundException();
 
@@ -75,22 +78,13 @@ public class UserService {
 
     /**
      * Deleta usuário
-     * @param user Usuário
+     * @param username ID do usuário a ser deletado
+     * @throws UserNotFoundException Se usuário não existe
      */
-    public void deleteUser(User user) throws UserNotFoundException {
-        user.setDeletedAt(LocalDateTime.from(LocalDateTime.now()));
-
+    public void deleteUser(String username) throws UserNotFoundException {
+        User user = getUser(username);
+        user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
-    }
-
-    /**
-     * Verifica se usuário já existe na base de dados. Valida campos chave
-     * @param user Usuário
-     * @return Se usuário já existe
-     */
-    private boolean userExists(User user) {
-        return userRepository.existsById(user.getId()) ||
-                userRepository.existsByEmail(user.getEmail());
     }
 
 }

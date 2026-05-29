@@ -14,4 +14,12 @@ public interface UserRepository extends CrudRepository<User, String> {
      */
     public boolean existsByEmail(String email);
 
+    /**
+     * Identifica se usuário existe por username (chave primária) ou e-mail (chave única)
+     * @param id Username
+     * @param email E-mail
+     * @return Se usuário existe
+     */
+    public boolean existsByIdOrEmail(String id, String email);
+
 }

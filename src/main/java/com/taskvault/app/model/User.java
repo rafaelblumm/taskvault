@@ -3,6 +3,8 @@ package com.taskvault.app.model;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.taskvault.app.payload.request.CreateUserRequest;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -47,6 +49,19 @@ public class User {
         this.email = email;
         this.role = role;
         this.password = password;
+        this.deletedAt = null;
+    }
+
+    /**
+     * Cria novo usuário
+     * @param userDto Dados da requisição
+     */
+    public User(CreateUserRequest userDto) {
+        this.id = userDto.id();
+        this.name = userDto.name();
+        this.email = userDto.email();
+        this.role = userDto.role();
+        this.password = userDto.password();
         this.deletedAt = null;
     }
 
