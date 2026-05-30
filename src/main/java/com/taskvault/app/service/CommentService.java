@@ -1,11 +1,13 @@
 package com.taskvault.app.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.taskvault.app.error.CommentNotFoundException;
 import com.taskvault.app.error.MissingAuthTokenException;
 import com.taskvault.app.error.TaskNotFoundException;
 import com.taskvault.app.model.Comment;
@@ -60,6 +62,46 @@ public class CommentService {
         if (!taskService.taskExists(taskId)) throw new TaskNotFoundException();
 
         return commentRepository.findAllByTaskIdOrderByCreationDatetimeAsc(taskId);
+    }
+
+    /**
+     * Deleta comentário de uma tarefa
+     * @param commentId ID da tarefa
+     * @throws CommentNotFoundException não encontrar tarefa
+     */
+    public void deleteComment(long commentId) throws CommentNotFoundException {
+        if (!commentExists(commentId)) throw new CommentNotFoundException();
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        comment.setDeletedAt(LocalDateTime.now());
+        commentRepository.save(comment);
+    }
+
+    /**
+     * Deleta comentário de uma tarefa
+     * @param taskId ID da tarefa
+     * @throws TaskNotFoundException não encontrar tarefa
+     */
+    public void deleteAllComments(long taskId) throws TaskNotFoundException {
+        if (!taskService.taskExists(taskId)) throw new TaskNotFoundException();
+
+        List<Comment> comments = listComments(taskId);
+        int counter = comments.size();
+
+        for (int i = 0; i < counter; i++) {
+            Comment comment = comments.removeFirst();
+            deleteComment(comment.getId());
+        }
+    }
+
+
+    /**
+     * Verifica se o comentário existe
+     * @param id ID do comentário
+     * @return Se o comentário existe
+     */
+    public boolean commentExists(long id) {
+        return commentRepository.existsById(id);
     }
 
 }
