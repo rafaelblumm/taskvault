@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.taskvault.app.model.User;
 import com.taskvault.app.model.UserRole;
 import com.taskvault.app.payload.request.CreateUserRequest;
+import com.taskvault.app.payload.request.UpdateUserRequest;
 import com.taskvault.app.payload.response.UserResponse;
 import com.taskvault.app.repository.UserRepository;
 
@@ -38,8 +40,8 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             "johndoe",
             "John Doe",
             "johndoe@enterprise.com",
-            "My!P4ssw0rd",
-            UserRole.USER
+            UserRole.USER,
+            "My!P4ssw0rd"
         );
         var expectedResponse = new UserResponse(
             user.id(),
@@ -104,8 +106,8 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             "johndoeivy",
             "John Doe Ivy",
             "johndoeivy@enterprise.com",
-            "My!P4ssw0rd",
-            UserRole.USER
+            UserRole.USER,
+            "My!P4ssw0rd"
         );
         getClient().post()
             .uri("/user")
@@ -129,6 +131,135 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             .headers((headers) -> headers.setBearerAuth(getAuthToken()))
             .exchange()
             .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa busca de usuário */
+    @Test
+    public void getUserTest() {
+        var expected = new UserResponse(
+            "testuser",
+            "Test Super User",
+            "test@dev.com",
+            UserRole.SYSADMIN
+        );
+        getClient().get()
+            .uri("/user/testuser")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectBody(UserResponse.class)
+            .consumeWith((result) -> assertEquals(expected, result.getResponseBody()));
+    }
+
+    /** Testa busca de usuário inexistente */
+    @Test
+    public void getInexistentUserTest() {
+        getClient().get()
+            .uri("/user/inexistent")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa atualização de usuário */
+    @Test
+    public void updateUserTest() {
+        var createRequest = new CreateUserRequest(
+            "marydoe",
+            "Mary Doe",
+            "marydoe@enterprise.com",
+            UserRole.GUEST,
+            "My!P4s$w0rd"
+        );
+        getClient().post()
+            .uri("/user")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .accept(MediaType.APPLICATION_JSON)
+            .body(createRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CREATED);
+
+        var updateRequest = new UpdateUserRequest(
+            "New name",
+            "newemail@dev.com",
+            UserRole.USER,
+            "newp4s$w0rd"
+        );
+        var expected = new UserResponse(
+            "marydoe",
+            "New name",
+            "newemail@dev.com",
+            UserRole.USER
+        );
+        getClient().put()
+            .uri("/user/marydoe")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .accept(MediaType.APPLICATION_JSON)
+            .body(updateRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.OK)
+            .expectBody(UserResponse.class)
+            .consumeWith((result) -> assertEquals(expected, result.getResponseBody()));
+    }
+
+    /** Testa atualização de usuário inexistente */
+    @Test
+    public void updateInexistentUserTest() {
+        var updateRequest = new UpdateUserRequest(
+            "New name",
+            "newemail@dev.com",
+            UserRole.USER,
+            "newp4s$w0rd"
+        );
+        getClient().put()
+            .uri("/user/inexistent")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .body(updateRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa atualização de usuário com e-mail de outro usuário */
+    @Test
+    public void updateUserDuplicatedEmailTest() {
+        List.of(
+            new CreateUserRequest(
+                "christiandoe",
+                "Christian Doe",
+                "crisdoe@enterprise.com",
+                UserRole.GUEST,
+                "My!P4s$w0rd"
+            ),
+            new CreateUserRequest(
+                "hughdoe",
+                "Hugh Doe",
+                "hughdoe@enterprise.com",
+                UserRole.USER,
+                "My!P4s$w0rd"
+            )
+        ).forEach((request) ->
+            getClient().post()
+                .uri("/user")
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CREATED)
+        );
+
+        var updateRequest = new UpdateUserRequest(
+            "Christian Doe",
+            "hughdoe@enterprise.com",
+            UserRole.USER,
+            "newp4s$w0rd"
+        );
+        getClient().put()
+            .uri("/user/christiandoe")
+            .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+            .body(updateRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT);
     }
 
 }

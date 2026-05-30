@@ -41,14 +41,14 @@ public class UserController {
     }
 
     /**
-     * Envia informações de um usuário
+     * Busca usuário
      * @param username Nome de usuário procurado
      * @return Dados do usuário
      * @throws UserNotFoundException Usuário não encontrado
      */
     @GetMapping("/{username}")
     @ResponseStatus(code = HttpStatus.OK)
-    public UserResponse findUser(@PathVariable String username) throws UserNotFoundException {
+    public UserResponse getUser(@PathVariable String username) throws UserNotFoundException {
         return UserResponse.from(userService.getUser(username));
     }
 
@@ -61,9 +61,9 @@ public class UserController {
      */
     @PutMapping("/{username}")
     @ResponseStatus(code = HttpStatus.OK)
-    public void updateUser(@PathVariable String username, @RequestBody UpdateUserRequest userDto)
+    public UserResponse updateUser(@PathVariable String username, @RequestBody UpdateUserRequest userDto)
     throws UserNotFoundException, UserAlreadyExistsException {
-        userService.updateUser(username, userDto);
+        return UserResponse.from(userService.updateUser(username, userDto));
     }
 
     /**

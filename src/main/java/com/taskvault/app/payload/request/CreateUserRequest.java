@@ -7,13 +7,13 @@ import com.taskvault.app.model.UserRole;
  * @param id ID do usuário
  * @param name Nome do usuário
  * @param email Email do usuário
- * @param password Senha do usuário
  * @param role Cargo do usuário
+ * @param password Senha do usuário
  */
 public record CreateUserRequest(
     String id,
     String name,
     String email,
-    String password,
-    UserRole role
+    UserRole role,
+    String password
 ) {}
