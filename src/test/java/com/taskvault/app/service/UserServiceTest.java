@@ -41,8 +41,8 @@ public class UserServiceTest {
             "teste",
             "Usuário Teste",
             "teste@dev.com",
-            "SuperSecretPassword123",
-            UserRole.GUEST
+            UserRole.GUEST,
+            "SuperSecretPassword123"
         );
 
         String encodedPassword = userDto.password() + "[encoded]";
@@ -76,8 +76,8 @@ public class UserServiceTest {
         var userDto = new UpdateUserRequest(
             "testeAtualizado",
             "testeAtualizado@dev.com",
-                "SenhaAtualizada",
-            UserRole.GUEST
+            UserRole.GUEST,
+            "SenhaAtualizada"
         );
 
         String encodedPassword = userDto.password() + "[encoded]";
