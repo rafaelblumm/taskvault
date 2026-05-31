@@ -78,24 +78,6 @@ public class CommentService {
     }
 
     /**
-     * Deleta comentário de uma tarefa
-     * @param taskId ID da tarefa
-     * @throws TaskNotFoundException não encontrar tarefa
-     */
-    public void deleteAllComments(long taskId) throws TaskNotFoundException {
-        if (!taskService.taskExists(taskId)) throw new TaskNotFoundException();
-
-        List<Comment> comments = listComments(taskId);
-        int counter = comments.size();
-
-        for (int i = 0; i < counter; i++) {
-            Comment comment = comments.removeFirst();
-            deleteComment(comment.getId());
-        }
-    }
-
-
-    /**
      * Verifica se o comentário existe
      * @param id ID do comentário
      * @return Se o comentário existe
