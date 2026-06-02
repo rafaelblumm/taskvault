@@ -1,19 +1,24 @@
 package com.taskvault.app.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.taskvault.app.error.UserRoleNotPermitted;
 import com.taskvault.app.error.MissingAuthTokenException;
 import com.taskvault.app.error.TaskNotFoundException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.Task;
 import com.taskvault.app.model.User;
+import com.taskvault.app.model.UserRole;
 import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.repository.TaskRepository;
+import com.taskvault.app.repository.CommentRepository;
 import com.taskvault.app.security.SecurityUtils;
 
 /** Serviço de gerenciamento de tarefas */
@@ -27,6 +32,10 @@ public class TaskService {
     /** Serviço de gerenciamento de usuários */
     @Autowired
     private UserService userService;
+
+    /** Acesso a camada de persistência de comentários */
+    @Autowired
+    private CommentRepository commentRepository;
 
     /**
      * Cria novo registro de tarefa com o usuário corrente como criador
@@ -77,6 +86,28 @@ public class TaskService {
             task.setAssignee(null);
 
         return taskRepository.save(task);
+    }
+
+    /**
+     * Deleta tarefa
+     * @param taskId ID da tarefa a ser deletada
+     */
+    @Transactional
+    public void deleteTask(long taskId) throws TaskNotFoundException {
+        Authentication auth = SecurityUtils.getAuthenticatedUser().orElseThrow(MissingAuthTokenException::new);
+        User requester = userService.getUser(auth.getName());
+
+
+        if (!(requester.getRole().equals(UserRole.SYSADMIN) || requester.getRole().equals(UserRole.ADMIN)))
+            throw new UserRoleNotPermitted();
+
+
+        var deletionTime = LocalDateTime.now();
+        Task task = taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        task.setDeletedAt(deletionTime);
+
+        commentRepository.updateDeletedAtByTaskId(deletionTime, task.getId());
+        taskRepository.save(task);
     }
 
     /**

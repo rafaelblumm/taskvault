@@ -1,13 +1,15 @@
 package com.taskvault.app.controller;
 
+import com.taskvault.app.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +29,10 @@ public class TaskController {
     /** Serviço de gestão de tarefas */
     @Autowired
     private TaskService taskService;
+
+    /** Serviço de gestão de comentários */
+    @Autowired
+    private CommentService commentService;
 
     /**
      * Endpoint de criação de tarefas
@@ -69,5 +75,16 @@ public class TaskController {
     @ResponseStatus(code = HttpStatus.OK)
     public TaskResponse getTask(@PathVariable long taskId) throws TaskNotFoundException {
         return TaskResponse.from(taskService.getTask(taskId));
+    }
+
+    /**
+     * Deleta tarefa
+     * @param taskId Id da tarefa a ser deletado
+     * @throws TaskNotFoundException Usuário não encontrado
+     */
+    @DeleteMapping("{taskId}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteTask(@PathVariable long taskId) throws TaskNotFoundException {
+        taskService.deleteTask(taskId);
     }
 }
