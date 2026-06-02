@@ -3,6 +3,8 @@ package com.taskvault.app.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.taskvault.app.error.UserRoleNotPermitted;
+import com.taskvault.app.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -66,13 +68,22 @@ public class CommentService {
 
     /**
      * Deleta comentário de uma tarefa
-     * @param commentId ID da tarefa
-     * @throws CommentNotFoundException não encontrar tarefa
+     * @param commentId ID do comentário
+     * @throws CommentNotFoundException não encontrar comentário
      */
     public void deleteComment(long commentId) throws CommentNotFoundException {
         if (!commentExists(commentId)) throw new CommentNotFoundException();
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentNotFoundException::new);
+        Authentication auth = SecurityUtils.getAuthenticatedUser()
+                .orElseThrow(MissingAuthTokenException::new);
+        User requester = userService.getUser(auth.getName());
+
+        if (!(requester.getRole().equals(UserRole.SYSADMIN) ||
+              requester.getRole().equals(UserRole.ADMIN) ||
+              comment.getCreator() == requester)) throw new UserRoleNotPermitted();
+
         comment.setDeletedAt(LocalDateTime.now());
         commentRepository.save(comment);
     }
