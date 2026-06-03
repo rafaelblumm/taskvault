@@ -1,6 +1,7 @@
 package com.taskvault.app.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,16 @@ public class TaskService {
      */
     public Task getTask(long id) {
         return taskRepository.findById(id).orElseThrow(TaskNotFoundException::new);
+    }
+
+    /**
+     * Busca todas tarefas a partir do ID de usuário
+     * @param id Id do usuário
+     * @return todas tarefas encontrada
+     * @throws UserNotFoundException Se IDs de usuários não existirem
+     */
+    public List<Task> getAllTasksFromUser(String id) throws UserNotFoundException {
+        return taskRepository.findAllByAssigneeIdOrderByCreationDatetimeAsc(id);
     }
 
     /**
