@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +58,7 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                 Optional.of(assignee.getId())
         );
         var expectedResponse = new TaskResponse(
-                1,
+                0,
                 task.title(),
                 task.description(),
                 TaskStatus.PENDING,
@@ -67,6 +68,7 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                 task.assignee()
         );
 
+        final Long[] generatedId = new Long[1];
         getClient().post()
                 .uri("/task")
                 .headers((headers) -> headers.setBearerAuth(getAuthToken()))
@@ -76,8 +78,11 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                 .expectStatus().isEqualTo(HttpStatus.CREATED)
                 .expectBody(TaskResponse.class)
                 .consumeWith((result) -> {
+                    assertNotNull(result.getResponseBody());
+
+                    generatedId[0] = result.getResponseBody().id();
+
                     TaskResponse response = result.getResponseBody();
-                    assertNotNull(response);
 
                     assertEquals(expectedResponse.title(), response.title());
                     assertEquals(expectedResponse.description(), response.description());
@@ -88,13 +93,13 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                     assertEquals(expectedResponse.assignee(), response.assignee());
                 });
 
-        Optional<Task> checkIfTaskWasSaved = taskRepository.findById(expectedResponse.id());
+        Optional<Task> checkIfTaskWasSaved = taskRepository.findById(generatedId[0]);
         assertTrue(checkIfTaskWasSaved.isPresent());
 
         Task createdTask = checkIfTaskWasSaved.get();
         User creator = createdTask.getCreator();
 
-        assertEquals(expectedResponse.id(), createdTask.getId());
+        assertEquals(generatedId[0], createdTask.getId());
         assertEquals(expectedResponse.title(), createdTask.getTitle());
         assertEquals(expectedResponse.description(), createdTask.getDescription());
         assertEquals(expectedResponse.status(), createdTask.getStatus());
