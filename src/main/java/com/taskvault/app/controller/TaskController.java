@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.taskvault.app.error.MissingAuthTokenException;
 import com.taskvault.app.error.TaskNotFoundException;
@@ -20,6 +21,8 @@ import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.payload.response.TaskResponse;
 import com.taskvault.app.service.TaskService;
+
+import java.util.List;
 
 /** Controller das funcinalidades de gestão de tarefas */
 @RestController
@@ -86,5 +89,21 @@ public class TaskController {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteTask(@PathVariable long taskId) throws TaskNotFoundException {
         taskService.deleteTask(taskId);
+    }
+
+    /**
+     * Procura todas as tarefas designadas a um usuário
+     * @param id ID do usuário
+     * @throws UserNotFoundException Se o usuário não existir
+     */
+    @GetMapping
+    @ResponseStatus(code = HttpStatus.OK)
+    public List<TaskResponse> getAllTasksFromUser(
+            @RequestParam("assignedTo") String id
+    ) throws UserNotFoundException {
+        return taskService.getAllTasksFromUser(id)
+                .stream()
+                .map(TaskResponse::from)
+                .toList();
     }
 }
