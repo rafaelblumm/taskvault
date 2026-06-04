@@ -1,5 +1,6 @@
 package com.taskvault.app.controller;
 
+import com.taskvault.app.model.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.payload.response.TaskResponse;
 import com.taskvault.app.service.TaskService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /** Controller das funcinalidades de gestão de tarefas */
@@ -92,17 +94,21 @@ public class TaskController {
     }
 
     /**
-     * Procura todas as tarefas designadas a um usuário
+     * Procura tarefas com filtros avançados
      * @param id ID do usuário
-     * @throws UserNotFoundException Se o usuário não existir
+     * @param status Estado atual da tarefa
+     * @param dueBefore Data limite da procura
+     * @throws TaskNotFoundException Se nenhuma tarefa existir
      */
     @GetMapping
     @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<TaskResponse> getAllTasksFromUser(
-            @RequestParam("assignedTo") String id
-    ) throws UserNotFoundException {
-        return taskService.getAllTasksFromUser(id)
+    public List<TaskResponse> getFilteredTasks(
+            @RequestParam("assignedTo") String id,
+            @RequestParam(value = "status", required = false) TaskStatus status,
+            @RequestParam(value = "dueBefore", required = false) LocalDate dueBefore
+    ) throws TaskNotFoundException {
+        return taskService.getTasksWithFilter(id, status, dueBefore)
                 .stream()
                 .map(TaskResponse::from)
                 .toList();

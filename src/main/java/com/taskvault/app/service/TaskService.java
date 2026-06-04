@@ -1,9 +1,11 @@
 package com.taskvault.app.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.taskvault.app.model.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -121,13 +123,26 @@ public class TaskService {
     }
 
     /**
-     * Busca todas tarefas a partir do ID de usuário
-     * @param id Id do usuário
+     * Busca todas tarefas que satisfazem aos filtros
+     * @param id ID do usuário
+     * @param status Estado atual da tarefa
+     * @param dueBefore Data limite da procura
      * @return todas tarefas encontrada
-     * @throws UserNotFoundException Se IDs de usuários não existirem
+     * @throws TaskNotFoundException Se a tarefa não existir
      */
-    public List<Task> getAllTasksFromUser(String id) throws UserNotFoundException {
-        return taskRepository.findAllByAssigneeIdOrderByCreationDatetimeAsc(id);
+    public List<Task> getTasksWithFilter(
+            String id,
+            TaskStatus status,
+            LocalDate dueBefore
+    ) throws TaskNotFoundException {
+        if (status == null && dueBefore == null)
+            return taskRepository.findAllByAssigneeIdOrderByCreationDatetimeAsc(id);
+
+        return taskRepository.findAllByAssigneeIdAndStatusAndDueDateBeforeOrderByCreationDatetimeAsc(
+                id,
+                status,
+                dueBefore
+        );
     }
 
     /**
