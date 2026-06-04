@@ -11,13 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.taskvault.app.error.UserRoleNotPermitted;
+import com.taskvault.app.error.InvalidDataException;
 import com.taskvault.app.error.MissingAuthTokenException;
 import com.taskvault.app.error.TaskNotFoundException;
+import com.taskvault.app.error.UnauthorizedException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.Task;
 import com.taskvault.app.model.User;
-import com.taskvault.app.model.UserRole;
 import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.repository.TaskRepository;
@@ -32,13 +32,17 @@ public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+    /** Acesso a camada de persistência de comentários */
+    @Autowired
+    private CommentRepository commentRepository;
+
     /** Serviço de gerenciamento de usuários */
     @Autowired
     private UserService userService;
 
-    /** Acesso a camada de persistência de comentários */
+    /** Serviço de autenticação de usuários */
     @Autowired
-    private CommentRepository commentRepository;
+    private AuthService authService;
 
     /**
      * Cria novo registro de tarefa com o usuário corrente como criador
@@ -62,11 +66,13 @@ public class TaskService {
      * @return Tarefa criada
      * @throws UserNotFoundException Se IDs de usuários não existirem
      */
-    protected Task createTask(CreateTaskRequest taskDto, User creator)
-    throws UserNotFoundException {
-        var task = new Task(taskDto, creator, getUserFromDto(taskDto));
+    protected Task createTask(CreateTaskRequest taskDto, User creator) throws UserNotFoundException {
+        taskDto.dueDate().ifPresent(dueDate -> {
+            if (dueDate.isBefore(LocalDate.now()))
+                throw new InvalidDataException();
+        });
 
-        return taskRepository.save(task);
+        return taskRepository.save(new Task(taskDto, creator, getUserFromDto(taskDto)));
     }
 
     /**
@@ -78,6 +84,10 @@ public class TaskService {
     public Task updateTask(long taskId, UpdateTaskRequest taskDto)
     throws TaskNotFoundException, UserNotFoundException {
         Task task = taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new);
+        taskDto.dueDate().ifPresent(dueDate -> {
+            if (dueDate.isBefore(task.getCreationDatetime().toLocalDate()))
+                throw new InvalidDataException();
+        });
 
         task.setTitle(taskDto.title());
         task.setDescription(taskDto.description().orElse(null));
@@ -97,13 +107,8 @@ public class TaskService {
      */
     @Transactional
     public void deleteTask(long taskId) throws TaskNotFoundException {
-        Authentication auth = SecurityUtils.getAuthenticatedUser().orElseThrow(MissingAuthTokenException::new);
-        User requester = userService.getUser(auth.getName());
-
-
-        if (!(requester.getRole().equals(UserRole.SYSADMIN) || requester.getRole().equals(UserRole.ADMIN)))
-            throw new UserRoleNotPermitted();
-
+        if (!authService.getCurrentUser().orElseThrow(UserNotFoundException::new).isElevated())
+            throw new UnauthorizedException();
 
         var deletionTime = LocalDateTime.now();
         Task task = taskRepository.findById(taskId).orElseThrow(TaskNotFoundException::new);
