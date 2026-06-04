@@ -5,6 +5,7 @@ import java.util.List;
 import com.taskvault.app.error.CommentNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ public class CommentController {
      * @throws TaskNotFoundException
      */
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(code = HttpStatus.CREATED)
     public CommentResponse createComment(
         @PathVariable long taskId,
@@ -51,6 +53,7 @@ public class CommentController {
      * @throws TaskNotFoundException Se tarefa não existir
      */
     @GetMapping
+    @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
     public List<CommentResponse> listComments(@PathVariable long taskId) throws TaskNotFoundException {
         return commentService.listComments(taskId)
@@ -65,6 +68,7 @@ public class CommentController {
      * @throws CommentNotFoundException Se o comentário não existir
      */
     @DeleteMapping("/{commentId}")
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable long commentId) throws CommentNotFoundException {
         commentService.deleteComment(commentId);

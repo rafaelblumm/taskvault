@@ -4,6 +4,7 @@ import com.taskvault.app.payload.request.CreateUserRequest;
 import com.taskvault.app.payload.request.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class UserController {
      * @throws UserAlreadyExistsException Dados conflitantes com outro usuário
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(code = HttpStatus.CREATED)
     public UserResponse createUser(@RequestBody CreateUserRequest userDto) throws UserAlreadyExistsException {
         return UserResponse.from(userService.createUser(userDto));
@@ -47,6 +49,7 @@ public class UserController {
      * @throws UserNotFoundException Usuário não encontrado
      */
     @GetMapping("/{username}")
+    @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
     public UserResponse getUser(@PathVariable String username) throws UserNotFoundException {
         return UserResponse.from(userService.getUser(username));
@@ -60,6 +63,7 @@ public class UserController {
      * @throws UserAlreadyExistsException Dados alterados conflitam com outro usuário
      */
     @PutMapping("/{username}")
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(code = HttpStatus.OK)
     public UserResponse updateUser(@PathVariable String username, @RequestBody UpdateUserRequest userDto)
     throws UserNotFoundException, UserAlreadyExistsException {
@@ -72,6 +76,7 @@ public class UserController {
      * @throws UserNotFoundException Usuário não encontrado
      */
     @DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) throws UserNotFoundException {
         userService.deleteUser(username);
