@@ -1,5 +1,6 @@
 package com.taskvault.app.service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.taskvault.app.error.InvalidTokenException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.User;
+import com.taskvault.app.security.SecurityUtils;
+import com.taskvault.app.security.auth.RevokedTokensStore;
 import com.taskvault.app.security.auth.UserDetailsImpl;
 import com.taskvault.app.security.service.JWTService;
 import com.taskvault.app.security.service.UserDetailsServiceImpl;
@@ -31,6 +36,10 @@ public class AuthService {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    /** Tokens revogados */
+    @Autowired
+    private RevokedTokensStore revokedTokensStore;
+
     /**
      * Autentica usuário na aplicação e gera JWT
      * @param username Nome de usuário
@@ -43,6 +52,22 @@ public class AuthService {
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
 
         return jwtService.generateToken(userDetails);
+    }
+
+    /**
+     * Desautentica usuário da aplicação
+     * @param token Token do usuário
+     * @throws InvalidTokenException Se token for inválido
+     */
+    public void deauthenticateCurrentUser(String bearerToken) throws InvalidTokenException {
+        try {
+            String token = SecurityUtils.stripBearerPrefix(bearerToken);
+            Instant expirationTime = jwtService.getExpiration(token)
+                .orElseThrow(InvalidTokenException::new);
+            revokedTokensStore.add(token, expirationTime);
+        } catch (JWTVerificationException e) {
+            throw new InvalidTokenException();
+        }
     }
 
     /**
