@@ -1,8 +1,8 @@
 package com.taskvault.app.controller;
 
-import com.taskvault.app.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -33,10 +33,6 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-    /** Serviço de gestão de comentários */
-    @Autowired
-    private CommentService commentService;
-
     /**
      * Endpoint de criação de tarefas
      * @param taskData DTO com dados da tarefa
@@ -45,6 +41,7 @@ public class TaskController {
      * @throws UserNotFoundException Usuário não encontrado (criador ou designado)
      */
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(code = HttpStatus.CREATED)
     public TaskResponse createTask(@RequestBody CreateTaskRequest taskDto)
     throws MissingAuthTokenException, UserNotFoundException {
@@ -60,6 +57,7 @@ public class TaskController {
      * @throws TaskNotFoundException Tarefa não encontrada
      */
     @PutMapping("{taskId}")
+    @PreAuthorize("hasRole('USER')")
     @ResponseStatus(code = HttpStatus.OK)
     public TaskResponse updateTask(
         @PathVariable("taskId") long id,
@@ -75,6 +73,7 @@ public class TaskController {
      * @throws TaskNotFoundException Tarefa não encontrada
      */
     @GetMapping("{taskId}")
+    @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
     public TaskResponse getTask(@PathVariable long taskId) throws TaskNotFoundException {
         return TaskResponse.from(taskService.getTask(taskId));
@@ -86,6 +85,7 @@ public class TaskController {
      * @throws TaskNotFoundException Usuário não encontrado
      */
     @DeleteMapping("{taskId}")
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteTask(@PathVariable long taskId) throws TaskNotFoundException {
         taskService.deleteTask(taskId);
@@ -97,6 +97,7 @@ public class TaskController {
      * @throws UserNotFoundException Se o usuário não existir
      */
     @GetMapping
+    @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
     public List<TaskResponse> getAllTasksFromUser(
             @RequestParam("assignedTo") String id

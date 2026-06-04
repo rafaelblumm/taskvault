@@ -6,9 +6,12 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,6 +26,7 @@ import com.taskvault.app.security.service.UserDetailsServiceImpl;
 /** Configurações de segurança da aplicação */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     /** Endpoints que não necessitam de autenticação */
@@ -68,6 +72,17 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new Argon2PasswordEncoder(32, 72, 1, 16384, 2);
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        var hierarchy = """
+                ROLE_SYSADMIN > ROLE_ADMIN
+                ROLE_ADMIN > ROLE_USER
+                ROLE_USER > ROLE_GUEST
+                """;
+
+        return RoleHierarchyImpl.fromHierarchy(hierarchy);
     }
 
 }
