@@ -32,6 +32,14 @@ public class UserDetailsImpl implements UserDetails {
         return this.user;
     }
 
+    /**
+     * Indica se usuário possui permissões elevadas
+     * @return
+     */
+    public boolean isElevated() {
+        return this.user.getRole().isElevated();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));

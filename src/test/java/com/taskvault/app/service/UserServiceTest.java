@@ -34,6 +34,9 @@ public class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private AuthService authService;
+
     /** Testa criação de novo usuário */
     @Test
     public void createUserTest() {
@@ -91,6 +94,7 @@ public class UserServiceTest {
 
         when(passwordEncoder.encode(userDto.password())).thenReturn(encodedPassword);
         when(userRepository.findById("teste")).thenReturn(Optional.of(user));
+        when(authService.canUpdateResource(user)).thenReturn(true);
         when(userRepository.save(any(User.class))).thenReturn(expected);
 
         var createdUser = userService.updateUser("teste", userDto);

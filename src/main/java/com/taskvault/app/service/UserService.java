@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.taskvault.app.error.UnauthorizedException;
 import com.taskvault.app.error.UserAlreadyExistsException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.User;
@@ -24,6 +25,10 @@ public class UserService {
     /** Codificador de senha de usuários */
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    /** Serviço de autenticação de usuários */
+    @Autowired
+    private AuthService authService;
 
     /**
      * Cria novo usuário
@@ -51,6 +56,9 @@ public class UserService {
     public User updateUser(String username, UpdateUserRequest userDto)
     throws UserNotFoundException, UserAlreadyExistsException {
         User user = getUser(username);
+        if (!authService.canUpdateResource(user))
+            throw new UnauthorizedException();
+
         if (!user.getEmail().equals(userDto.email()) && userRepository.existsByEmail(userDto.email()))
             throw new UserAlreadyExistsException();
 

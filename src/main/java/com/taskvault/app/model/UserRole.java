@@ -9,5 +9,13 @@ public enum UserRole {
     /** Administrador */
     ADMIN,
     /** Administrador do sistema */
-    SYSADMIN
+    SYSADMIN;
+
+    /**
+     * Indica se é permissão elevada
+     * @return
+     */
+    public boolean isElevated() {
+        return this == UserRole.ADMIN || this == UserRole.SYSADMIN;
+    }
 }

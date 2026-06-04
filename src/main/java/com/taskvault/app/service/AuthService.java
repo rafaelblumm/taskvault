@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.taskvault.app.error.UserNotFoundException;
+import com.taskvault.app.model.User;
 import com.taskvault.app.security.auth.UserDetailsImpl;
 import com.taskvault.app.security.service.JWTService;
 import com.taskvault.app.security.service.UserDetailsServiceImpl;
@@ -50,6 +52,18 @@ public class AuthService {
     public Optional<UserDetailsImpl> getCurrentUser() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
             .map((auth) -> (UserDetailsImpl) userDetailsService.loadUserByUsername(auth.getName()));
+    }
+
+    /**
+     * Indica se usuário possui permissões para alterar um recurso criado por determinado usuário
+     * @param resourceCreator Criador do recurso
+     * @return Se possui permissão
+     */
+    public boolean canUpdateResource(User resourceCreator) {
+        UserDetailsImpl user = getCurrentUser()
+            .orElseThrow(UserNotFoundException::new);
+
+        return user.isElevated() || resourceCreator.getId().equals(user.getUsername());
     }
 
 }
