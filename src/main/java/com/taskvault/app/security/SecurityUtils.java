@@ -16,4 +16,13 @@ public class SecurityUtils {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
     }
 
+    /**
+     * Remove prefixo de tokens bearer
+     * @param bearerToken Token completo
+     * @return Token
+     */
+    public static String stripBearerPrefix(String bearerToken) {
+        return bearerToken.replace("Bearer ", "");
+    }
+
 }

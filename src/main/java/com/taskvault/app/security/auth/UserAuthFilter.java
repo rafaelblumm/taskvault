@@ -12,9 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.taskvault.app.error.InvalidTokenException;
 import com.taskvault.app.error.MissingAuthTokenException;
+import com.taskvault.app.error.UnauthorizedException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.repository.UserRepository;
 import com.taskvault.app.security.SecurityConfig;
+import com.taskvault.app.security.SecurityUtils;
 import com.taskvault.app.security.service.JWTService;
 
 import jakarta.servlet.FilterChain;
@@ -37,14 +39,19 @@ public class UserAuthFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepository;
 
+    /** Tokens revogados */
+    @Autowired
+    private RevokedTokensStore revokedTokensStore;
+
     @Override
-    protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-    ) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    throws ServletException, IOException {
         if (isAuthRequired(request)) {
-            setAuthContext(getUserDetailsFromRequest(request));
+            try {
+                setAuthContext(getUserDetailsFromRequest(request));
+            } catch (UnauthorizedException | InvalidTokenException | UserNotFoundException | MissingAuthTokenException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -69,13 +76,15 @@ public class UserAuthFilter extends OncePerRequestFilter {
      */
     private UserDetailsImpl getUserDetailsFromRequest(HttpServletRequest request)
     throws MissingAuthTokenException, UserNotFoundException, InvalidTokenException {
+        String token = getUserToken(request).orElseThrow(MissingAuthTokenException::new);
+        if (revokedTokensStore.isRevoked(token))
+            throw new UnauthorizedException();
+
         String username;
         try {
-            username = getUserToken(request)
-                .map(jwtService::getUsername)
-                .orElseThrow(MissingAuthTokenException::new);
+            username = jwtService.getUsername(token);
         } catch (JWTVerificationException e) {
-            throw new InvalidTokenException("Token inválido");
+            throw new InvalidTokenException();
         }
 
         UserDetailsImpl userDetails = userRepository.findById(username)
@@ -93,7 +102,7 @@ public class UserAuthFilter extends OncePerRequestFilter {
      */
     private Optional<String> getUserToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(AUTH_HEADER_NAME))
-            .map(header -> header.replace("Bearer ", ""));
+            .map(SecurityUtils::stripBearerPrefix);
     }
 
     /**

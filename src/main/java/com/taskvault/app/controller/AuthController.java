@@ -2,7 +2,9 @@ package com.taskvault.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +34,15 @@ public class AuthController {
         );
 
         return new LoginResponse(token);
+    }
+
+    /**
+     * Endpoint de desautenticação de usuário
+     * @param bearerToken Token de usuário
+     */
+    @PostMapping("/logout")
+    public void deauthenticateUser(@RequestHeader("Authorization") String bearerToken) {
+        userAuthService.deauthenticateCurrentUser(bearerToken);
     }
 
 }

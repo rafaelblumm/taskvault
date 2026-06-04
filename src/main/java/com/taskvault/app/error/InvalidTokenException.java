@@ -11,14 +11,4 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     code = HttpStatus.UNAUTHORIZED,
     reason = "Token de acesso inválido"
 )
-public class InvalidTokenException extends RuntimeException {
-
-    /**
-     * Cria nova exceção informando mensagem
-     * @param message Mensagem de erro
-     */
-    public InvalidTokenException(String message) {
-        super(message);
-    }
-
-}
+public class InvalidTokenException extends RuntimeException {}

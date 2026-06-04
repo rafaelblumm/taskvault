@@ -14,6 +14,11 @@ import com.taskvault.app.payload.response.LoginResponse;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 abstract class AuthenticatedControllerIT {
 
+    /** Nome de usuário de testes */
+    public static String TEST_USER = "testuser";
+    /** Senha do usuário de testes */
+    public static String TEST_PASS = "integr4tionT&st";
+
     /** Porta do servidor */
     @LocalServerPort
     private int port;
@@ -32,7 +37,7 @@ abstract class AuthenticatedControllerIT {
 
         authToken = client.method(HttpMethod.GET)
             .uri("/auth/login")
-            .body(new LoginRequest("testuser", "integr4tionT&st"))
+            .body(new LoginRequest(TEST_USER, TEST_PASS))
             .exchange()
             .returnResult(LoginResponse.class)
             .getResponseBody()
