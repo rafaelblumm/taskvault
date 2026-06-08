@@ -7,7 +7,6 @@ import com.taskvault.app.model.UserRole;
 import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.payload.response.TaskResponse;
-import com.taskvault.app.payload.response.UserResponse;
 import com.taskvault.app.repository.TaskRepository;
 import com.taskvault.app.repository.UserRepository;
 
@@ -20,7 +19,6 @@ import org.springframework.http.MediaType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -133,57 +131,30 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
     /** Testa atualização de tarefas */
     @Test
     public void updateTaskTest() {
-        var assignee = new User(
-                "assignee",
-                "assignee",
-                "assignee@gmail.com",
-                UserRole.ADMIN,
-                "AssigneePassword"
-        );
-        userRepository.save(assignee);
-
-        var task = new CreateTaskRequest(
-                "Tarefa teste",
-                Optional.of("Descrição!"),
-                Optional.of(LocalDate.from(NOW_DATE_TIME)),
-                Optional.of(assignee.getId())
-        );
-
-        final Long[] generatedId = new Long[1];
-        getClient().post()
-                .uri("/task")
-                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
-                .accept(MediaType.APPLICATION_JSON)
-                .body(task)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.CREATED)
-                .expectBody(TaskResponse.class)
-                .consumeWith((result) -> {
-                    assertNotNull(result.getResponseBody());
-                    generatedId[0] = result.getResponseBody().id();
-                });
+        long taskId = createSampleTask();
+        Task task = taskRepository.findById(taskId).orElseThrow();
 
         UpdateTaskRequest updateTaskRequest = new UpdateTaskRequest(
                 "Título novo",
                 Optional.of("Descrição nova"),
                 TaskStatus.IN_PROGRESS,
                 Optional.of(LocalDate.from(NOW_DATE_TIME)),
-                Optional.of(assignee.getId())
+                task.getAssignee().map(User::getId)
         );
 
         TaskResponse expectedResponse = new TaskResponse(
-                generatedId[0],
+                taskId,
                 updateTaskRequest.title(),
                 updateTaskRequest.description(),
                 updateTaskRequest.status(),
-                NOW_DATE_TIME,
-                task.dueDate(),
-                "testuser",
-                task.assignee()
+                task.getCreationDatetime(),
+                updateTaskRequest.dueDate(),
+                task.getCreator().getId(),
+                updateTaskRequest.assignee()
         );
 
         getClient().put()
-                .uri("/task/" + generatedId[0])
+                .uri("/task/" + taskId)
                 .headers((headers) -> headers.setBearerAuth(getAuthToken()))
                 .accept(MediaType.APPLICATION_JSON)
                 .body(updateTaskRequest)
@@ -193,14 +164,12 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                 .consumeWith((result) -> {
                     assertNotNull(result.getResponseBody());
 
-                    generatedId[0] = result.getResponseBody().id();
-
                     TaskResponse response = result.getResponseBody();
 
                     assertEquals(expectedResponse.title(), response.title());
                     assertEquals(expectedResponse.description(), response.description());
                     assertEquals(expectedResponse.status(), response.status());
-                    assertTrue(response.creationDatetime().isAfter(expectedResponse.creationDatetime()));
+                    assertEquals(expectedResponse.creationDatetime(), response.creationDatetime());
                     assertEquals(expectedResponse.dueDate(), response.dueDate());
                     assertEquals(expectedResponse.creator(), response.creator());
                     assertEquals(expectedResponse.assignee(), response.assignee());
@@ -225,5 +194,77 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
                 .body(updateTaskRequest)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa procura de tarefa */
+    @Test
+    public void getTaskTest() {
+        long taskId = createSampleTask();
+        Task task = taskRepository.findById(taskId).orElseThrow();
+
+        TaskResponse expectedResponse = new TaskResponse(
+                taskId,
+                task.getTitle(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getCreationDatetime(),
+                task.getDueDate(),
+                task.getCreator().getId(),
+                task.getAssignee().map(User::getId)
+        );
+
+        getClient().get()
+                .uri("/task/" + taskId)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.OK)
+                .expectBody(TaskResponse.class)
+                .consumeWith((result) -> {
+                    TaskResponse response = result.getResponseBody();
+
+                    assertNotNull(response);
+                    assertEquals(expectedResponse.title(), response.title());
+                    assertEquals(expectedResponse.description(), response.description());
+                    assertEquals(expectedResponse.status(), response.status());
+                    assertEquals(expectedResponse.creationDatetime(), response.creationDatetime());
+                    assertEquals(expectedResponse.dueDate(), response.dueDate());
+                    assertEquals(expectedResponse.creator(), response.creator());
+                    assertEquals(expectedResponse.assignee(), response.assignee());
+                });
+    }
+
+    /** Testa procura de tarefa não existente */
+    @Test
+    public void getNonExistentTaskTest() {
+        getClient().get()
+                .uri("/task/" + 999)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Cria tarefa para testes
+     * @return ID da tarefa
+     */
+    public long createSampleTask() {
+        var taskRequest = new CreateTaskRequest(
+                "Tarefa teste",
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty()
+        );
+
+        return getClient().post()
+                .uri("/task")
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .body(taskRequest)
+                .exchange()
+                .returnResult(TaskResponse.class)
+                .getResponseBody()
+                .id();
     }
 }
