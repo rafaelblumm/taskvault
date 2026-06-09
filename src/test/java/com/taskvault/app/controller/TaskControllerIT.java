@@ -4,6 +4,7 @@ import com.taskvault.app.model.Task;
 import com.taskvault.app.model.TaskStatus;
 import com.taskvault.app.model.User;
 import com.taskvault.app.model.UserRole;
+import com.taskvault.app.payload.request.CommentRequest;
 import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.payload.response.TaskResponse;
@@ -18,11 +19,14 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /** Testes de integração dos endpoints de gestão de tarefas */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -239,6 +243,79 @@ public class TaskControllerIT extends AuthenticatedControllerIT {
     public void getNonExistentTaskTest() {
         getClient().get()
                 .uri("/task/" + 999)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa a deleção de tarefas */
+    @Test
+    public void deleteTaskTest() {
+        long taskId = createSampleTask();
+
+        //Procurando a tarefa antes da deleção
+        getClient().get()
+                .uri("/task/" + taskId)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.OK);
+
+        getClient().delete()
+                .uri("/task/" + taskId)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NO_CONTENT);
+
+        //Procurando a tarefa após a deleção
+        getClient().get()
+                .uri("/task/" + taskId)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /** Testa a deleção de tarefas com comentários */
+    @Test
+    public void deleteTaskWithCommentsTest() {
+        long taskId = createSampleTask();
+        List<CommentRequest> comments = List.of(
+                "Primeiro comentário",
+                "Segundo comentário",
+                "Terceiro comentário"
+        ).stream().map(CommentRequest::new).toList();
+
+        comments.forEach((request) ->
+            getClient().post()
+                    .uri("/task/" + taskId + "/comment")
+                    .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .exchange()
+                    .expectStatus().isEqualTo(HttpStatus.CREATED)
+        );
+
+        //Procurando comentários antes da deleção
+        getClient().get()
+                .uri("/task/" + taskId + "/comment")
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.OK);
+
+        getClient().delete()
+                .uri("/task/" + taskId)
+                .headers((headers) -> headers.setBearerAuth(getAuthToken()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NO_CONTENT);
+
+        //Procurando comentários após deleção
+        getClient().get()
+                .uri("/task/" + taskId + "/comment")
                 .headers((headers) -> headers.setBearerAuth(getAuthToken()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
