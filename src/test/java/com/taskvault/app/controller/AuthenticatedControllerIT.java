@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpMethod;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 import com.taskvault.app.payload.request.LoginRequest;
@@ -35,7 +34,7 @@ abstract class AuthenticatedControllerIT {
             .baseUrl("http://localhost:" + port)
             .build();
 
-        authToken = client.method(HttpMethod.GET)
+        authToken = client.post()
             .uri("/auth/login")
             .body(new LoginRequest(TEST_USER, TEST_PASS))
             .exchange()
