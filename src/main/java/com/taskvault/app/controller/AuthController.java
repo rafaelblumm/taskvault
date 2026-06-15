@@ -1,7 +1,6 @@
 package com.taskvault.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -26,7 +25,7 @@ public class AuthController {
      * @param loginRequest Dados da requisição
      * @return Token de usuário
      */
-    @GetMapping("/login")
+    @PostMapping("/login")
     public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
         String token = userAuthService.authenticateUser(
             loginRequest.user(),

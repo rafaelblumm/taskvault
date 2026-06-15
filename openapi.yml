@@ -25,26 +25,18 @@ tags:
 
 paths:
   /auth/login:
-    get:
+    post:
       tags:
         - auth
       summary: Autenticação de usuário
       description: Autentica o usuário na aplicação.
       security: []
 
-      parameters:
-        - name: user
-          in: query
-          description: Nome de usuário
-          required: true
-          schema:
-            type: string
-        - name: pass
-          in: query
-          description: Credencial do usuário
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
       responses:
         '200':
           description: OK
@@ -593,6 +585,15 @@ components:
           type: string
           format: jwt
           readOnly: true
+
+    AuthRequest:
+      properties:
+        user:
+          description: Nome de usuário
+          type: string
+        pass:
+          description: Credencial do usuário
+          type: string
 
   responses:
     UnauthorizedError:
