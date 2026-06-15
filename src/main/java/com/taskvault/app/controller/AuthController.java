@@ -23,16 +23,11 @@ public class AuthController {
     /**
      * Endpoint de autenticação de usuário
      * @param loginRequest Dados da requisição
-     * @return Token de usuário
+     * @return Token de usuário e data de expiração
      */
     @PostMapping("/login")
     public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
-        String token = userAuthService.authenticateUser(
-            loginRequest.user(),
-            loginRequest.pass()
-        );
-
-        return new LoginResponse(token);
+        return userAuthService.authenticateUser(loginRequest.user(), loginRequest.pass());
     }
 
     /**

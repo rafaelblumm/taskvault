@@ -585,6 +585,11 @@ components:
           type: string
           format: jwt
           readOnly: true
+        expiresAt:
+          description: Data/hora de expiração do token
+          type: string
+          format: date-time
+          readOnly: true
 
     AuthRequest:
       properties:
