@@ -27,7 +27,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
-        return userAuthService.authenticateUser(loginRequest.user(), loginRequest.pass());
+        return LoginResponse.from(userAuthService.authenticateUser(loginRequest.user(), loginRequest.pass()));
     }
 
     /**
@@ -37,6 +37,16 @@ public class AuthController {
     @PostMapping("/logout")
     public void deauthenticateUser(@RequestHeader("Authorization") String bearerToken) {
         userAuthService.deauthenticateCurrentUser(bearerToken);
+    }
+
+    /**
+     * Endpoint de atualização do token de usuário
+     * @param bearerToken Token de usuário
+     * @return Novo token e data de expiração
+     */
+    @PostMapping("/refresh")
+    public LoginResponse refreshUserAuth(@RequestHeader("Authorization") String bearerToken) {
+        return LoginResponse.from(userAuthService.refreshUserAuth(bearerToken));
     }
 
 }

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.taskvault.app.error.InvalidTokenException;
 import com.taskvault.app.error.UserNotFoundException;
+import com.taskvault.app.model.Jwt;
 import com.taskvault.app.model.User;
-import com.taskvault.app.payload.response.LoginResponse;
 import com.taskvault.app.security.SecurityUtils;
 import com.taskvault.app.security.auth.RevokedTokensStore;
 import com.taskvault.app.security.auth.UserDetailsImpl;
@@ -49,16 +49,12 @@ public class AuthService {
      * @param password Senha do usuário
      * @return JWT
      */
-    public LoginResponse authenticateUser(String username, String password) {
+    public Jwt authenticateUser(String username, String password) {
         var userPassAuthToken = new UsernamePasswordAuthenticationToken(username, password);
         Authentication auth = authManager.authenticate(userPassAuthToken);
         var userDetails = (UserDetailsImpl) auth.getPrincipal();
-        String token = jwtService.generateToken(userDetails);
-        LocalDateTime expirationDateTime = jwtService.getExpiration(token)
-            .map((exp) -> LocalDateTime.ofInstant(exp, ZoneId.systemDefault()))
-            .orElseThrow(() -> new RuntimeException("Não foi possível buscar a data de expiração do token"));
 
-        return new LoginResponse(token, expirationDateTime);
+        return generateToken(userDetails);
     }
 
     /**
@@ -75,6 +71,20 @@ public class AuthService {
         } catch (JWTVerificationException e) {
             throw new InvalidTokenException();
         }
+    }
+
+    /**
+     * Atualiza token de usuário
+     * @param bearerToken Token atual
+     * @return Novo token
+     * @throws UserNotFoundException Se não encontrar usuário autenticado
+     * @throws InvalidTokenException Se token for inválido
+     */
+    public Jwt refreshUserAuth(String bearerToken) throws UserNotFoundException, InvalidTokenException {
+        Jwt token = generateToken(getCurrentUser().orElseThrow(UserNotFoundException::new));
+        deauthenticateCurrentUser(bearerToken);
+
+        return token;
     }
 
     /**
@@ -96,6 +106,20 @@ public class AuthService {
             .orElseThrow(UserNotFoundException::new);
 
         return user.isElevated() || resourceCreator.getId().equals(user.getUsername());
+    }
+
+    /**
+     * Cria JWT para usuário autenticado
+     * @param user Dados do usuário
+     * @return Dados do token
+     */
+    private Jwt generateToken(UserDetailsImpl user) {
+        String token = jwtService.generateToken(user);
+        LocalDateTime expirationDateTime = jwtService.getExpiration(token)
+            .map((exp) -> LocalDateTime.ofInstant(exp, ZoneId.systemDefault()))
+            .orElseThrow(() -> new RuntimeException("Não foi possível buscar a data de expiração do token"));
+
+        return new Jwt(token, expirationDateTime);
     }
 
 }

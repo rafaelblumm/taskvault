@@ -49,6 +49,26 @@ paths:
         default:
           description: Erro inesperado
 
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Atualiza token
+      description: Atualiza token de usuário da aplicação.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          description: Usuário ou senha inválidos
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: Erro inesperado
+
   /auth/logout:
     post:
       tags:
