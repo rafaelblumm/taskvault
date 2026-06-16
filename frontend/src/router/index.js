@@ -16,9 +16,22 @@ const router = createRouter({
         {
             name: "tasks",
             path: "/tasks",
-            component: () => import("@/views/TasksView"),
+            component: () => import("@/views/TaskListView"),
             meta: { requiresAuth: true }
         },
+        {
+            name: "task",
+            path: "/task/:id",
+            component: () => import("@/views/TaskView"),
+            props: true,
+            meta: { requiresAuth: true }
+        },
+        {
+            name: "createTask",
+            path: "/createTask",
+            component: () => import("@/views/CreateTaskView"),
+            meta: { requiresAuth: true }
+        }
     ]
 });
 

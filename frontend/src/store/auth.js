@@ -6,7 +6,7 @@ import UserService from "@/service/user";
 /** Store de dados de autenticação */
 export const useAuthStore = defineStore("auth", {
     state: () => ({
-        user: {},
+        user: sessionStorage.getItem("user") ? JSON.parse(sessionStorage.getItem("user")) : {},
         isAuthenticated: !!TokenService.getToken()
     }),
 
@@ -15,10 +15,14 @@ export const useAuthStore = defineStore("auth", {
     },
 
     actions: {
-        setAuth(token, user) {
+        setAuth(authData) {
             this.isAuthenticated = true;
+            TokenService.setToken(authData.token, authData.expiresAt);
+        },
+
+        setUser(user) {
             this.user = user;
-            TokenService.setToken(token);
+            sessionStorage.setItem("user", JSON.stringify(user));
         },
 
         purgeAuth() {
@@ -28,11 +32,8 @@ export const useAuthStore = defineStore("auth", {
         },
 
         async login(username, password) {
-            const authData = await AuthService.login(username, password);
-            TokenService.setToken(authData.token, authData.expiresAt);
-            this.user = await UserService.get(username);
-
-            return this.user;
+            this.setAuth(await AuthService.login(username, password));
+            this.setUser(await UserService.get(username));
         },
 
         logout() {
