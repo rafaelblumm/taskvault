@@ -229,14 +229,14 @@ paths:
           schema:
             type: string
             format: TaskStatus
-        - name: createdBy
+        - name: creator
           in: query
           description: ID do usuário criador
           required: false
           schema:
             type: string
             maxLength: 35
-        - name: assignedTo
+        - name: assignee
           in: query
           description: ID do usuário designado para a tarefa
           required: false
