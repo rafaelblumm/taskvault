@@ -1,6 +1,6 @@
 package com.taskvault.app.controller;
 
-import com.taskvault.app.model.TaskStatus;
+import com.taskvault.app.model.TaskFilters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.taskvault.app.error.MissingAuthTokenException;
 import com.taskvault.app.error.TaskNotFoundException;
 import com.taskvault.app.error.UserNotFoundException;
@@ -23,7 +21,6 @@ import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.payload.response.TaskResponse;
 import com.taskvault.app.service.TaskService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /** Controller das funcinalidades de gestão de tarefas */
@@ -103,12 +100,8 @@ public class TaskController {
     @GetMapping
     @PreAuthorize("hasRole('GUEST')")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<TaskResponse> getFilteredTasks(
-            @RequestParam("assignedTo") String id,
-            @RequestParam(value = "status", required = false) TaskStatus status,
-            @RequestParam(value = "dueBefore", required = false) LocalDate dueBefore
-    ) throws TaskNotFoundException {
-        return taskService.getTasksWithFilter(id, status, dueBefore)
+    public List<TaskResponse> getFilteredTasks(TaskFilters filters) throws TaskNotFoundException {
+        return taskService.getTasks(filters)
                 .stream()
                 .map(TaskResponse::from)
                 .toList();

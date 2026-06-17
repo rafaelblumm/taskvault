@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.taskvault.app.model.TaskStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,9 @@ import com.taskvault.app.error.TaskNotFoundException;
 import com.taskvault.app.error.UnauthorizedException;
 import com.taskvault.app.error.UserNotFoundException;
 import com.taskvault.app.model.Task;
+import com.taskvault.app.model.TaskFilters;
 import com.taskvault.app.model.User;
+
 import com.taskvault.app.payload.request.CreateTaskRequest;
 import com.taskvault.app.payload.request.UpdateTaskRequest;
 import com.taskvault.app.repository.TaskRepository;
@@ -128,25 +129,20 @@ public class TaskService {
     }
 
     /**
-     * Busca todas tarefas que satisfazem aos filtros
-     * @param id ID do usuário
-     * @param status Estado atual da tarefa
-     * @param dueBefore Data limite da procura
-     * @return todas tarefas encontrada
-     * @throws TaskNotFoundException Se a tarefa não existir
+     * Lista e filtra tarefas
+     * @param filters Filtros
+     * @return Tarefas filtradas
      */
-    public List<Task> getTasksWithFilter(
-            String id,
-            TaskStatus status,
-            LocalDate dueBefore
-    ) throws TaskNotFoundException {
-        if (status == null && dueBefore == null)
-            return taskRepository.findAllByAssigneeIdOrderByCreationDatetimeAsc(id);
-
-        return taskRepository.findAllByAssigneeIdAndStatusAndDueDateBeforeOrderByCreationDatetimeAsc(
-                id,
-                status,
-                dueBefore
+    public List<Task> getTasks(TaskFilters filters) {
+        return taskRepository.findByFilters(
+                filters.titleContains().orElse(null),
+                filters.status().orElse(null),
+                filters.creator().orElse(null),
+                filters.assignee().orElse(null),
+                filters.createdBefore().orElse(null),
+                filters.createdAfter().orElse(null),
+                filters.dueDateBefore().orElse(null),
+                filters.dueDateAfter().orElse(null)
         );
     }
 

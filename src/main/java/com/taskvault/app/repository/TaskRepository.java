@@ -6,7 +6,10 @@ import org.springframework.data.repository.CrudRepository;
 import com.taskvault.app.model.Task;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /** Camada de acesso aos dados da tabela de tarefas */
 public interface TaskRepository extends CrudRepository<Task, Long> {
@@ -30,5 +33,26 @@ public interface TaskRepository extends CrudRepository<Task, Long> {
             TaskStatus status,
             LocalDate dueDate
     );
+
+        @Query("SELECT t FROM Task t WHERE "
+            + "(:title IS NULL OR LOWER(t.title) LIKE LOWER(CONCAT('%',:title,'%'))) AND "
+            + "(:status IS NULL OR t.status = :status) AND "
+            + "(:createdBy IS NULL OR t.creator.id = :createdBy) AND "
+            + "(:assignedTo IS NULL OR t.assignee.id = :assignedTo) AND "
+            + "(:createdBefore IS NULL OR t.creationDatetime < :createdBefore) AND "
+            + "(:createdAfter IS NULL OR t.creationDatetime > :createdAfter) AND "
+            + "(:dueBefore IS NULL OR t.dueDate < :dueBefore) AND "
+            + "(:dueAfter IS NULL OR t.dueDate > :dueAfter) "
+            + "ORDER BY t.creationDatetime ASC")
+        List<Task> findByFilters(
+            @Param("title") String title,
+            @Param("status") TaskStatus status,
+            @Param("createdBy") String createdBy,
+            @Param("assignedTo") String assignedTo,
+            @Param("createdBefore") LocalDateTime createdBefore,
+            @Param("createdAfter") LocalDateTime createdAfter,
+            @Param("dueBefore") LocalDate dueBefore,
+            @Param("dueAfter") LocalDate dueAfter
+        );
 
 }
