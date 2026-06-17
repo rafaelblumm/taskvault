@@ -2,6 +2,8 @@ package com.taskvault.app.payload.request;
 
 import com.taskvault.app.model.UserRole;
 
+import java.util.Optional;
+
 /**
  * Dados da atualização de usuários
  * @param name Nome do usuário
@@ -13,5 +15,5 @@ public record UpdateUserRequest(
     String name,
     String email,
     UserRole role,
-    String password
+    Optional<String> password
 ) {}

@@ -80,7 +80,7 @@ public class UserServiceTest {
             "testeAtualizado",
             "testeAtualizado@dev.com",
             UserRole.GUEST,
-            "SenhaAtualizada"
+                Optional.of("SenhaAtualizada")
         );
 
         String encodedPassword = userDto.password() + "[encoded]";
@@ -92,7 +92,7 @@ public class UserServiceTest {
             encodedPassword
         );
 
-        when(passwordEncoder.encode(userDto.password())).thenReturn(encodedPassword);
+        when(passwordEncoder.encode(userDto.password().orElseThrow())).thenReturn(encodedPassword);
         when(userRepository.findById("teste")).thenReturn(Optional.of(user));
         when(authService.canUpdateResource(user)).thenReturn(true);
         when(userRepository.save(any(User.class))).thenReturn(expected);

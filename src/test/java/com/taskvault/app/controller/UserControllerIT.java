@@ -184,7 +184,7 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             "New name",
             "newemail@dev.com",
             UserRole.USER,
-            "newp4s$w0rd"
+                Optional.of("newp4s$w0rd")
         );
         var expected = new UserResponse(
             "marydoe",
@@ -210,7 +210,7 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             "New name",
             "newemail@dev.com",
             UserRole.USER,
-            "newp4s$w0rd"
+                Optional.of("newp4s$w0rd")
         );
         getClient().put()
             .uri("/user/inexistent")
@@ -252,7 +252,7 @@ public class UserControllerIT extends AuthenticatedControllerIT {
             "Christian Doe",
             "hughdoe@enterprise.com",
             UserRole.USER,
-            "newp4s$w0rd"
+                Optional.of("newp4s$w0rd")
         );
         getClient().put()
             .uri("/user/christiandoe")
