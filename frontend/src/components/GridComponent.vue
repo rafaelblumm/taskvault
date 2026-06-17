@@ -69,7 +69,7 @@ function handleRowClick(entry) {
             </tr>
         </tbody>
     </table>
-    <p v-else>No matches found.</p>
+    <p v-else>Nenhuma tarefa encontrada.</p>
 </template>
 
 <style>

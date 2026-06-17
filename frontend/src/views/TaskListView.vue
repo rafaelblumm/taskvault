@@ -1,8 +1,28 @@
 <script setup>
 import GridComponent from '@/components/GridComponent.vue'
+import Modal from '@/components/ModalComponent.vue'
 import TaskService from '@/service/task'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+const showAdvancedFilters = ref(false)
+const filters = ref({
+    titleContains: '',
+    status: '',
+    creator: '',
+    assignee: '',
+    createdBefore: '',
+    createdAfter: '',
+    dueDateBefore: '',
+    dueDateAfter: ''
+})
+
+const statusOptions = ref([
+    { text: TaskService.format_status('PENDING'), value: 'PENDING' },
+    { text: TaskService.format_status('IN_PROGRESS'), value: 'IN_PROGRESS' },
+    { text: TaskService.format_status('DONE'), value: 'DONE' },
+    { text: 'Nenhum', value: '' }
+])
 
 const searchQuery = ref('')
 const gridColumns = ['ID', 'Título', 'Status', 'Responsável', 'Data prevista']
@@ -30,6 +50,31 @@ function newTask() {
     router.push('/createTask')
 }
 
+async function cancelFilters() {
+    showAdvancedFilters.value = false
+    loadTasks()
+}
+
+async function submitFilters() {
+    showAdvancedFilters.value = false
+    console.log('Submitted filters:', filters.value)
+    const response = await TaskService.list_tasks(filters.value)
+    tasks.value = Array.isArray(response) ? response : response?.data ?? []
+}
+
+function clearFilters() {
+    filters.value = {
+        titleContains: '',
+        status: '',
+        creator: '',
+        assignee: '',
+        createdBefore: '',
+        createdAfter: '',
+        dueDateBefore: '',
+        dueDateAfter: ''
+    }
+}
+
 onMounted(loadTasks)
 </script>
 
@@ -38,7 +83,64 @@ onMounted(loadTasks)
     <div>
         Buscar <input name="query" v-model="searchQuery">
         <button @click="newTask">Criar</button>
+        <button id="show-modal" @click="showAdvancedFilters = true">Filtros avançados</button>
     </div>
-    <GridComponent :data="gridData" :columns="gridColumns" :filter-key="searchQuery" @row-click="handleRowClick">
-    </GridComponent>
+    <GridComponent
+        :data="gridData"
+        :columns="gridColumns"
+        :filter-key="searchQuery"
+        @row-click="handleRowClick"
+    />
+    <Modal :show="showAdvancedFilters" @cancel="cancelFilters()" @submit="submitFilters()">
+        <template #header>
+            <h3>Filtros avançados</h3>
+        </template>
+
+        <template #body>
+            <form @submit.prevent="submitFilters">
+                <div>
+                    <label for="titleContains">Título contém</label>
+                    <input id="titleContains" type="text" v-model="filters.titleContains">
+                </div>
+                <div>
+                    <label for="status">Status</label>
+                    <select v-model="filters.status">
+                        <option v-for="option in statusOptions" :value="option.value" v-bind:key="option.value">
+                            {{ option.text }}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label for="creator">Criador</label>
+                    <input id="creator" type="text" v-model="filters.creator">
+                </div>
+                <div>
+                    <label for="assignee">Responsável</label>
+                    <input id="assignee" type="text" v-model="filters.assignee">
+                </div>
+                <div>
+                    <label for="createdBefore">Criado antes de</label>
+                    <input id="createdBefore" type="date" v-model="filters.createdBefore">
+                </div>
+                <div>
+                    <label for="createdAfter">Criado depois de</label>
+                    <input id="createdAfter" type="date" v-model="filters.createdAfter">
+                </div>
+                <div>
+                    <label for="dueDateBefore">Data prevista antes de</label>
+                    <input id="dueDateBefore" type="date" v-model="filters.dueDateBefore">
+                </div>
+                <div>
+                    <label for="dueDateAfter">Data prevista depois de</label>
+                    <input id="dueDateAfter" type="date" v-model="filters.dueDateAfter">
+                </div>
+            </form>
+        </template>
+
+        <template #footer>
+            <button class="modal-default-button" @click="submitFilters()">OK</button>
+            <button class="modal-default-button" @click="showAdvancedFilters = false">Cancelar</button>
+            <button class="modal-default-button" @click="clearFilters()">Limpar</button>
+        </template>
+    </Modal>
 </template>
