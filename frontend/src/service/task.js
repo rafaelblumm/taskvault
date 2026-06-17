@@ -7,18 +7,31 @@ const authStore = useAuthStore();
 /** Serviço de manipulação de tarefas */
 const TaskService = {
     /**
-     * Lista tarefas
-     * @returns {Array}
+     * Lista tarefas com filtros
+     * @param {*} filters Filtros da tarefas
+     * @returns {Array} Lista de tarefas
      */
-    async list_my_tasks() {
-        const assignedTo = authStore.currentUser.id
-        const response = await apiClient.get(`/task?assignedTo=${encodeURIComponent(assignedTo)}`)
+    async list_tasks(filters) {
+        const params = Object.fromEntries(
+            Object.entries(filters || {}).filter(
+                ([, value]) => value !== null && value !== undefined && value !== ''
+            )
+        );
+        const response = await apiClient.get('/task', { params });
         switch (response.status) {
             case 200:
                 return response.data;
             default:
                 throw SERVER_ERROR;
         }
+    },
+
+    /**
+     * Lista tarefas
+     * @returns {Array}
+     */
+    async list_my_tasks() {
+        return this.list_tasks({ assignee: authStore.currentUser.id })
     },
 
     /**
