@@ -1,6 +1,7 @@
 <script setup>
 import GridComponent from '@/components/GridComponent.vue'
 import TaskService from '@/service/task'
+import '@/assets/styles.css';
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -42,3 +43,54 @@ onMounted(loadTasks)
     <GridComponent :data="gridData" :columns="gridColumns" :filter-key="searchQuery" @row-click="handleRowClick">
     </GridComponent>
 </template>
+
+<style scoped>
+.grid-wrapper {
+    border: 1px solid #2e8b57;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px;
+}
+
+:deep(table) {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #eceff1;
+}
+
+:deep(th) {
+    background-color: #3cb371;
+    color: #ffffff;
+    font-weight: normal;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #2e8b57;
+    border-right: 1px solid #2e8b57;
+    white-space: nowrap;
+}
+
+:deep(th:last-child) {
+    border-right: none;
+}
+
+:deep(td) {
+    padding: 12px 14px;
+    color: #cccccc;
+    border-bottom: 1px solid #333333;
+    border-right: 1px solid #333333;
+}
+
+:deep(td:last-child) {
+    border-right: none;
+}
+
+:deep(tr:last-child td) {
+    border-bottom: none;
+}
+
+:deep(tr:hover td) {
+    background-color: #252525;
+    cursor: pointer;
+}
+</style>
