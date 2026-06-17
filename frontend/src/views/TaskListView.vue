@@ -57,7 +57,6 @@ async function cancelFilters() {
 
 async function submitFilters() {
     showAdvancedFilters.value = false
-    console.log('Submitted filters:', filters.value)
     const response = await TaskService.list_tasks(filters.value)
     tasks.value = Array.isArray(response) ? response : response?.data ?? []
 }

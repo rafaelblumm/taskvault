@@ -35,6 +35,36 @@ const TaskService = {
     },
 
     /**
+     * Obtém uma tarefa pelo ID
+     * @param {Number} id ID da tarefa
+     * @returns {Object} Dados da tarefa
+     */
+    async get_task(id) {
+        const response = await apiClient.get(`/task/${id}`);
+        switch (response.status) {
+            case 200:
+                return response.data;
+            default:
+                throw SERVER_ERROR;
+        }
+    },
+
+    /**
+     * Atualiza uma tarefa
+     * @param {Object} taskData Dados da tarefa a atualizar
+     * @returns {Object} Tarefa atualizada
+     */
+    async update_task(taskData) {
+        const response = await apiClient.put(`/task/${taskData.id}`, taskData);
+        switch (response.status) {
+            case 200:
+                return response.data;
+            default:
+                throw SERVER_ERROR;
+        }
+    },
+
+    /**
      * Formata status de tarefa para exibição
      * @param {String} status
      * @returns {String} Status formatado

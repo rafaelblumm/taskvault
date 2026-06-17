@@ -39,5 +39,25 @@ export const useAuthStore = defineStore("auth", {
         logout() {
             this.purgeAuth();
         },
+
+        isGuest() {
+            return this.isAuthenticated && this.user.role === "GUEST";
+        },
+
+        isUser() {
+            return this.isAuthenticated && this.user.role === "USER";
+        },
+
+        isAdmin() {
+            return this.isAuthenticated && this.user.role === "ADMIN";
+        },
+
+        isSysAdmin() {
+            return this.isAuthenticated && this.user.role === "SYSADMIN";
+        },
+
+        hasElevatedPermissions() {
+            return this.isAdmin() || this.isSysAdmin();
+        }
     }
 });
