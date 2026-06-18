@@ -19,6 +19,7 @@ const newMessage = ref('')
 const submitting = ref(false)
 const deletingId = ref(null)
 const authStore = useAuthStore()
+const canComment = authStore.canComment()
 
 onMounted(async () => {
     if (!props.comments) {
@@ -77,7 +78,7 @@ const deleteComment = async (c) => {
 </script>
 
 <template>
-    <div class="comment-input-row">
+    <div v-if="canComment" class="comment-input-row">
         <input
             v-model="newMessage"
             class="comment-input"

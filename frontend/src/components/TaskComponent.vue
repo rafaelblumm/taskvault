@@ -22,6 +22,7 @@ const deleting = ref(false)
 const saveError = ref(null)
 const deleteError = ref(null)
 const authStore = useAuthStore()
+const hasEditPermission = authStore.canCreateTasks()
 
 const canEditTask = computed(() => {
     if (props.create) {
@@ -184,7 +185,7 @@ const handleDelete = async () => {
                 <button v-if="canDeleteTask" class="delete-button" @click="handleDelete" :disabled="deleting">
                     {{ deleting ? 'Deletando...' : 'Deletar' }}
                 </button>
-                <button class="edit-button" @click="toggleEditMode" :disabled="!canEditTask">
+                <button v-if="hasEditPermission" class="edit-button" @click="toggleEditMode" :disabled="!canEditTask">
                     Alterar
                 </button>
             </div>

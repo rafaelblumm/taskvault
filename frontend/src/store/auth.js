@@ -62,6 +62,10 @@ export const useAuthStore = defineStore("auth", {
 
         canCreateTasks() {
             return this.isUser() || this.hasElevatedPermissions();
+        },
+
+        canComment() {
+            return this.isAuthenticated && !this.isGuest();
         }
     }
 });
