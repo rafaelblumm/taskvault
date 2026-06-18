@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import TaskComponent from '@/components/TaskComponent.vue'
+import CommentComponent from '@/components/CommentComponent.vue'
 import TaskService from '@/service/task'
 import { useRouter } from 'vue-router'
 import Route from '@/common/route'
@@ -32,15 +33,24 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div>
+    <div class="task-view-container">
         <h1>Tarefa</h1>
         <div v-if="loading" class="loading">Carregando...</div>
         <div v-else-if="error" class="error">{{ error }}</div>
         <TaskComponent v-else :task="task" @task-deleted="handleDelete"/>
+        <CommentComponent v-if="task" :task-id="task.id" />
     </div>
 </template>
 
 <style scoped>
+.task-view-container {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
 .loading,
 .error {
     text-align: center;

@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import TaskService from '@/service/task'
 import { statusOptions } from '@/common/task-status'
+import { formatDate, formatDateTime } from '@/common/date-fmt'
 import { useAuthStore } from '@/store/auth'
 
 const props = defineProps({
@@ -55,14 +56,6 @@ watch(() => props.create, (isCreate) => {
         editMode.value = true
     }
 }, { immediate: true })
-
-const formatDate = (dateString) => {
-    return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : '-'
-}
-
-const formatDateTime = (dateTimeString) => {
-    return dateTimeString ? new Date(dateTimeString).toLocaleString('pt-BR') : '-'
-}
 
 const toggleEditMode = () => {
     if (!canEditTask.value) return

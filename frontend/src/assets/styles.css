@@ -53,3 +53,26 @@ button {
 button:hover {
     background-color: #276348;
 }
+
+.comment-list {
+    width: 100%;
+}
+
+.comment {
+    border: 1px solid rgba(255,255,255,0.04);
+    background: #0f1315;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.comment-creator {
+    font-weight: 700;
+    color: #9fd3c7;
+    margin-bottom: 6px;
+}
+
+.comment-message {
+    white-space: pre-wrap;
+    color: #dfeff0;
+}
