@@ -13,7 +13,7 @@ const Route = {
      * @returns {String}
      */
     taskList() {
-        return '/tasks'
+        return '/task'
     },
 
     /**
@@ -23,6 +23,14 @@ const Route = {
      */
     task(id) {
         return `/task/${id}`
+    },
+
+    /**
+     * Criação de tarefa
+     * @returns {String}
+     */
+    newTask() {
+        return this.task('new')
     }
 }
 

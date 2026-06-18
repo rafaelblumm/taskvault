@@ -4,6 +4,7 @@ import GridComponent from '@/components/GridComponent.vue'
 import Modal from '@/components/ModalComponent.vue'
 import TaskService from '@/service/task'
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/store/auth'
 import { useRouter } from 'vue-router'
 
 const showAdvancedFilters = ref(false)
@@ -29,6 +30,8 @@ const searchQuery = ref('')
 const gridColumns = ['ID', 'Título', 'Status', 'Responsável', 'Data prevista']
 const tasks = ref([])
 const router = useRouter()
+const authStore = useAuthStore()
+const canCreate = authStore.hasElevatedPermissions() || authStore.isUser()
 
 const gridData = computed(() => tasks.value.map(task => ({
     'ID': String(task.id),
@@ -48,7 +51,7 @@ function handleRowClick(entry) {
 }
 
 function newTask() {
-    router.push('/createTask')
+    router.push(Route.newTask())
 }
 
 async function cancelFilters() {
@@ -82,7 +85,7 @@ onMounted(loadTasks)
     <h1>Listagem de tarefas</h1>
     <div>
         Buscar <input name="query" v-model="searchQuery">
-        <button @click="newTask">Criar</button>
+        <button v-if="canCreate" @click="newTask">Criar</button>
         <button id="show-modal" @click="showAdvancedFilters = true">Filtros avançados</button>
     </div>
     <GridComponent

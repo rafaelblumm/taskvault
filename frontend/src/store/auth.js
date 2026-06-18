@@ -58,6 +58,10 @@ export const useAuthStore = defineStore("auth", {
 
         hasElevatedPermissions() {
             return this.isAdmin() || this.isSysAdmin();
+        },
+
+        canCreateTasks() {
+            return this.isUser() || this.hasElevatedPermissions();
         }
     }
 });

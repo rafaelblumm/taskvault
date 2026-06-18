@@ -65,6 +65,21 @@ const TaskService = {
     },
 
     /**
+     * Cria uma nova tarefa
+     * @param {Object} taskData
+     * @returns {Object} Tarefa criada
+     */
+    async create_task(taskData) {
+        const response = await apiClient.post('/task', taskData);
+        switch (response.status) {
+            case 201:
+                return response.data;
+            default:
+                throw SERVER_ERROR;
+        }
+    },
+
+    /**
      * Remove uma tarefa pelo ID
      * @param {Number} taskId ID da tarefa
      */

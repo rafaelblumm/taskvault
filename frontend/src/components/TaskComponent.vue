@@ -5,7 +5,11 @@ import { statusOptions } from '@/common/task-status'
 import { useAuthStore } from '@/store/auth'
 
 const props = defineProps({
-    task: Object
+    task: Object,
+    create: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const emit = defineEmits(['task-updated', 'task-deleted'])
@@ -19,6 +23,9 @@ const deleteError = ref(null)
 const authStore = useAuthStore()
 
 const canEditTask = computed(() => {
+    if (props.create) {
+        return authStore.canCreateTasks()
+    }
     return editedTask.value && (
         authStore.hasElevatedPermissions() ||
         (authStore.isUser() && editedTask.value.creator === authStore.currentUser.id)
@@ -35,12 +42,40 @@ watch(() => props.task, (newTask) => {
     }
 }, { immediate: true })
 
+watch(() => props.create, (isCreate) => {
+    if (isCreate) {
+        editedTask.value = {
+            title: '',
+            description: '',
+            status: 'PENDING',
+            dueDate: null,
+            creator: authStore.user.id,
+            assignee: null
+        }
+        editMode.value = true
+    }
+}, { immediate: true })
+
 const formatDate = (dateString) => {
     return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : '-'
 }
 
+const formatDateTime = (dateTimeString) => {
+    return dateTimeString ? new Date(dateTimeString).toLocaleString('pt-BR') : '-'
+}
+
 const toggleEditMode = () => {
     if (!canEditTask.value) return
+
+    if (props.create) {
+        if (editMode.value) {
+            emit('create-cancelled')
+            return
+        }
+        editMode.value = true
+        saveError.value = null
+        return
+    }
 
     if (editMode.value) {
         editedTask.value = { ...props.task }
@@ -53,8 +88,14 @@ const handleSave = async () => {
     try {
         saving.value = true
         saveError.value = null
-        await TaskService.update_task(editedTask.value)
+        if (props.create) {
+            const created = await TaskService.create_task(editedTask.value)
+            editMode.value = false
+            emit('task-created', created)
+            return
+        }
 
+        await TaskService.update_task(editedTask.value)
         editMode.value = false
         emit('task-updated', editedTask.value)
     } catch (err) {
@@ -130,7 +171,7 @@ const handleDelete = async () => {
 
                 <div class="info-field">
                     <label>Data de criação</label>
-                    <div class="info-box">{{ formatDate(editedTask.creationDatetime) }}</div>
+                    <div class="info-box">{{ formatDateTime(editedTask.creationDatetime) }}</div>
                 </div>
             </div>
         </div>

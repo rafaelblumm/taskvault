@@ -29,7 +29,7 @@ const router = createRouter({
         },
         {
             name: "createTask",
-            path: "/createTask",
+            path: Route.newTask(),
             component: () => import("@/views/CreateTaskView"),
             meta: { requiresAuth: true }
         }
