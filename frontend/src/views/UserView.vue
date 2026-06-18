@@ -8,7 +8,7 @@
             <button @click="$router.push('/getUser')">Obter Informações de um usuário</button>
             <button @click="$router.push('/updateUser')">Atualizar informações de um usuário</button>
             <button @click="$router.push('/deleteUser')"> Remover um usuário</button>
-            <button @click="$router.push('/tasks')">Voltar</button>
+            <button @click="$router.push('/task')">Voltar</button>
         </div>
     </div>
 </template>
