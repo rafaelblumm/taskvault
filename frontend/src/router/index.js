@@ -31,6 +31,36 @@ const router = createRouter({
             path: "/createTask",
             component: () => import("@/views/CreateTaskView"),
             meta: { requiresAuth: true }
+        },
+        {
+            name: "user",
+            path: "/user",
+            component: () => import("@/views/UserView"),
+            meta: { requiresAuth: true }
+        },
+        {
+            name: "createUser",
+            path: "/createUser",
+            component: () => import("@/views/CreateUserView"),
+            meta: { requiresAuth: true }
+        },
+        {
+            name: "getUser",
+            path: "/getUser",
+            component: () => import("@/views/GetUserView"),
+            meta: { requiresAuth: true }
+        },
+        {
+            name: "updateUser",
+            path: "/updateUser",
+            component: () => import("@/views/UpdateUserView"),
+            meta: { requiresAuth: true }
+        },
+        {
+            name: "deleteUser",
+            path: "/deleteUser",
+            component: () => import("@/views/DeleteUserView"),
+            meta: { requiresAuth: true }
         }
     ]
 });
