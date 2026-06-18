@@ -14,6 +14,8 @@ const props = defineProps({
 const localComments = ref(props.comments || [])
 const loading = ref(false)
 const error = ref(null)
+const newMessage = ref('')
+const submitting = ref(false)
 
 onMounted(async () => {
     if (!props.comments) {
@@ -27,9 +29,45 @@ onMounted(async () => {
         }
     }
 })
+
+const submitComment = async () => {
+    if (!newMessage.value || newMessage.value.trim() === '') {
+        error.value = 'Mensagem vazia'
+        return
+    }
+    if (newMessage.value.length > 2000) {
+        error.value = 'Mensagem muito longa'
+        return
+    }
+
+    try {
+        submitting.value = true
+        error.value = null
+        const created = await CommentService.create_comment(props.taskId, newMessage.value.trim())
+        localComments.value = [...(localComments.value || []), created]
+        newMessage.value = ''
+    } catch (err) {
+        error.value = 'Erro ao enviar comentário'
+    } finally {
+        submitting.value = false
+    }
+}
 </script>
 
 <template>
+    <div class="comment-input-row">
+        <input
+            v-model="newMessage"
+            class="comment-input"
+            type="text"
+            placeholder="Novo comentário"
+            :disabled="submitting"
+            @keyup.enter="submitComment"
+        />
+        <button class="comment-button" @click="submitComment" :disabled="submitting || !newMessage.trim()">
+            {{ submitting ? 'Enviando...' : 'Comentar' }}
+        </button>
+    </div>
     <div class="comment-list">
         <div v-if="loading" class="comment-loading">Carregando comentários...</div>
         <div v-else-if="error" class="comment-error">{{ error }}</div>
@@ -53,7 +91,7 @@ onMounted(async () => {
     margin: 20px auto 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: right;
     width: 100%;
 }
 
@@ -63,7 +101,7 @@ onMounted(async () => {
     border-radius: 6px;
     margin-bottom: 12px;
     min-width: 400px;
-    width: 60%;
+    width: calc(100% - 140px);
 }
 
 .comment-creator {
@@ -97,5 +135,51 @@ onMounted(async () => {
     text-align: center;
     color: #9aa3a6;
     padding: 12px 0;
+}
+
+.comment-input-row {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.comment-input {
+    flex: 1;
+    min-width: 400px;
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    height: 42px;
+}
+
+.comment-button {
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 3px;
+    border: none;
+    color: white;
+    background-color: #1e90ff;
+    cursor: pointer;
+    width: 100px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-button:hover:not(:disabled) {
+    background-color: #187bcd;
+}
+
+.comment-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 </style>

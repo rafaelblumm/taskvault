@@ -44,9 +44,8 @@ onMounted(async () => {
 
 <style scoped>
 .task-view-container {
-    max-width: 90%;
+    width: 90%;
     margin: 0 auto;
-    padding: 20px;
     display: flex;
     flex-direction: column;
 }

@@ -76,12 +76,11 @@ function handleRowClick(entry) {
 table {
     border: 2px solid #42b983;
     border-radius: 3px;
-    background-color: #fff;
 }
 
 th {
     background-color: #42b983;
-    color: rgba(255, 255, 255, 0.66);
+    color: #fff;
     cursor: pointer;
     user-select: none;
 }
@@ -94,6 +93,10 @@ th,
 td {
     min-width: 40px;
     padding: 7px 10px;
+}
+
+tr:hover {
+    color: #fff;
 }
 
 th.active {

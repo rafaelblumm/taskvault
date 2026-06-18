@@ -17,6 +17,22 @@ const CommentService = {
                 throw SERVER_ERROR;
         }
     }
+,
+    /**
+     * Cria um comentário para a tarefa
+     * @param {Number|String} taskId ID da tarefa
+     * @param {String} message Mensagem do comentário
+     * @returns {Object} Comentário criado
+     */
+    async create_comment(taskId, message) {
+        const response = await apiClient.post(`/task/${taskId}/comment`, { message });
+        switch (response.status) {
+            case 201:
+                return response.data;
+            default:
+                throw SERVER_ERROR;
+        }
+    }
 }
 
 export default CommentService;
