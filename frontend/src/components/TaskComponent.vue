@@ -8,12 +8,14 @@ const props = defineProps({
     task: Object
 })
 
-const emit = defineEmits(['task-updated'])
+const emit = defineEmits(['task-updated', 'task-deleted'])
 
 const editMode = ref(false)
 const editedTask = ref(null)
 const saving = ref(false)
+const deleting = ref(false)
 const saveError = ref(null)
+const deleteError = ref(null)
 const authStore = useAuthStore()
 
 const canEditTask = computed(() => {
@@ -21,6 +23,10 @@ const canEditTask = computed(() => {
         authStore.hasElevatedPermissions() ||
         (authStore.isUser() && editedTask.value.creator === authStore.currentUser.id)
     )
+})
+
+const canDeleteTask = computed(() => {
+    return editedTask.value && authStore.hasElevatedPermissions()
 })
 
 watch(() => props.task, (newTask) => {
@@ -55,6 +61,21 @@ const handleSave = async () => {
         saveError.value = 'Erro ao salvar tarefa'
     } finally {
         saving.value = false
+    }
+}
+
+const handleDelete = async () => {
+    if (!canDeleteTask.value || !confirm('Confirma a remoção da tarefa?')) return
+
+    try {
+        deleting.value = true
+        deleteError.value = null
+        await TaskService.delete_task(editedTask.value.id)
+        emit('task-deleted', editedTask.value.id)
+    } catch (err) {
+        deleteError.value = 'Erro ao deletar tarefa'
+    } finally {
+        deleting.value = false
     }
 }
 </script>
@@ -114,8 +135,8 @@ const handleSave = async () => {
             </div>
         </div>
 
-        <div v-if="saveError" class="error-message">
-            {{ saveError }}
+        <div v-if="saveError || deleteError" class="error-message">
+            {{ saveError || deleteError }}
         </div>
 
         <div class="button-section">
@@ -126,6 +147,9 @@ const handleSave = async () => {
                 <button class="cancel-button" @click="toggleEditMode" :disabled="saving">Cancelar</button>
             </div>
             <div v-else class="button-group">
+                <button v-if="canDeleteTask" class="delete-button" @click="handleDelete" :disabled="deleting">
+                    {{ deleting ? 'Deletando...' : 'Deletar' }}
+                </button>
                 <button class="edit-button" @click="toggleEditMode" :disabled="!canEditTask">
                     Alterar
                 </button>
@@ -273,7 +297,8 @@ const handleSave = async () => {
 
 .edit-button,
 .save-button,
-.cancel-button {
+.cancel-button,
+.delete-button {
     padding: 15px 15px;
     font-size: 16px;
     font-weight: bold;
@@ -317,6 +342,20 @@ const handleSave = async () => {
 
 .cancel-button:disabled {
     background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.delete-button {
+    background-color: #d9534f;
+    color: white;
+}
+
+.delete-button:hover:not(:disabled) {
+    background-color: #c9302c;
+}
+
+.delete-button:disabled {
+    background-color: #e3a6a3;
     cursor: not-allowed;
 }
 </style>

@@ -65,6 +65,20 @@ const TaskService = {
     },
 
     /**
+     * Remove uma tarefa pelo ID
+     * @param {Number} taskId ID da tarefa
+     */
+    async delete_task(taskId) {
+        const response = await apiClient.delete(`/task/${taskId}`);
+        switch (response.status) {
+            case 204:
+                return;
+            default:
+                throw SERVER_ERROR;
+        }
+    },
+
+    /**
      * Formata status de tarefa para exibição
      * @param {String} status
      * @returns {String} Status formatado

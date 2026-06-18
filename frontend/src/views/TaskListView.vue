@@ -1,4 +1,5 @@
 <script setup>
+import Route from '@/common/route'
 import GridComponent from '@/components/GridComponent.vue'
 import Modal from '@/components/ModalComponent.vue'
 import TaskService from '@/service/task'
@@ -43,7 +44,7 @@ const loadTasks = async () => {
 }
 
 function handleRowClick(entry) {
-    router.push('/task/' + entry.ID)
+    router.push(Route.task(entry.ID))
 }
 
 function newTask() {
