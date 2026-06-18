@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import Route from '@/common/route';
 import { useAuthStore } from '@/store/auth';
 import '@/assets/styles.css';
 
@@ -37,7 +38,7 @@ export default {
     methods: {
         login() {
             authStore.login(this.username, this.password)
-                .then(() => this.$router.push('/tasks'))
+                .then(() => this.$router.push(Route.taskList()))
                 .catch(() => alert("Login falhou"));
         }
     }

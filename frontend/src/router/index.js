@@ -1,34 +1,35 @@
 import { createRouter, createWebHistory } from "vue-router";
 import TokenService from "@/service/token";
+import Route from "@/common/route";
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
             path: "/",
-            redirect: "/login"
+            redirect: Route.login()
         },
         {
             name: "login",
-            path: "/login",
+            path: Route.login(),
             component: () => import("@/views/LoginView")
         },
         {
             name: "tasks",
-            path: "/tasks",
+            path: Route.taskList(),
             component: () => import("@/views/TaskListView"),
             meta: { requiresAuth: true }
         },
         {
             name: "task",
-            path: "/task/:id",
+            path: Route.task(":id"),
             component: () => import("@/views/TaskView"),
             props: true,
             meta: { requiresAuth: true }
         },
         {
             name: "createTask",
-            path: "/createTask",
+            path: Route.newTask(),
             component: () => import("@/views/CreateTaskView"),
             meta: { requiresAuth: true }
         },
