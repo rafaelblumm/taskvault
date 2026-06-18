@@ -33,6 +33,21 @@ const CommentService = {
                 throw SERVER_ERROR;
         }
     }
+    ,
+    /**
+     * Deleta um comentário da tarefa
+     * @param {Number|String} taskId ID da tarefa
+     * @param {Number|String} commentId ID do comentário
+     */
+    async delete_comment(taskId, commentId) {
+        const response = await apiClient.delete(`/task/${taskId}/comment/${commentId}`);
+        switch (response.status) {
+            case 204:
+                return;
+            default:
+                throw SERVER_ERROR;
+        }
+    }
 }
 
 export default CommentService;
