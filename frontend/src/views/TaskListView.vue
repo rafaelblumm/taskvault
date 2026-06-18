@@ -84,10 +84,12 @@ onMounted(loadTasks)
 
 <template>
     <h1>Listagem de tarefas</h1>
+    <div class="tasklist-header-buttons">
+        <button class="tasklist-buttons" v-if="canCreate" @click="newTask">Criar</button>
+        <button class="tasklist-buttons" id="show-modal" @click="showAdvancedFilters = true">Filtros avançados</button>
+    </div>
     <div>
-        Buscar <input name="query" v-model="searchQuery">
-        <button v-if="canCreate" @click="newTask">Criar</button>
-        <button id="show-modal" @click="showAdvancedFilters = true">Filtros avançados</button>
+        <input class="search-button" name="query" v-model="searchQuery" placeholder="Buscar">
     </div>
     <GridComponent
         :data="gridData"
@@ -150,9 +152,27 @@ onMounted(loadTasks)
 </template>
 
 <style scoped>
+.tasklist-header-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+.tasklist-buttons {
+    margin-left: 2.5px;
+    margin-right: 2.5px;
+}
+
+.search-button {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    margin-left: 2.5px;
+    margin-right: 2.5px;
+}
+
 .grid-wrapper {
     border: 1px solid #2e8b57;
-    border-radius: 4px;
     overflow: hidden;
     width: 100%;
     max-width: 800px;
@@ -161,12 +181,10 @@ onMounted(loadTasks)
 :deep(table) {
     width: 100%;
     border-collapse: collapse;
-    background-color: #eceff1;
 }
 
 :deep(th) {
     background-color: #3cb371;
-    color: #ffffff;
     font-weight: normal;
     padding: 10px 14px;
     text-align: left;
@@ -181,21 +199,10 @@ onMounted(loadTasks)
 
 :deep(td) {
     padding: 12px 14px;
-    color: #cccccc;
-    border-bottom: 1px solid #333333;
-    border-right: 1px solid #333333;
-}
-
-:deep(td:last-child) {
-    border-right: none;
-}
-
-:deep(tr:last-child td) {
-    border-bottom: none;
 }
 
 :deep(tr:hover td) {
-    background-color: #252525;
+    background-color: #00330b;
     cursor: pointer;
 }
 </style>

@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import TaskService from '@/service/task'
 import { statusOptions } from '@/common/task-status'
+import { formatDate, formatDateTime } from '@/common/date-fmt'
 import { useAuthStore } from '@/store/auth'
 
 const props = defineProps({
@@ -21,6 +22,7 @@ const deleting = ref(false)
 const saveError = ref(null)
 const deleteError = ref(null)
 const authStore = useAuthStore()
+const hasEditPermission = authStore.canCreateTasks()
 
 const canEditTask = computed(() => {
     if (props.create) {
@@ -55,14 +57,6 @@ watch(() => props.create, (isCreate) => {
         editMode.value = true
     }
 }, { immediate: true })
-
-const formatDate = (dateString) => {
-    return dateString ? new Date(dateString).toLocaleDateString('pt-BR') : '-'
-}
-
-const formatDateTime = (dateTimeString) => {
-    return dateTimeString ? new Date(dateTimeString).toLocaleString('pt-BR') : '-'
-}
 
 const toggleEditMode = () => {
     if (!canEditTask.value) return
@@ -191,7 +185,7 @@ const handleDelete = async () => {
                 <button v-if="canDeleteTask" class="delete-button" @click="handleDelete" :disabled="deleting">
                     {{ deleting ? 'Deletando...' : 'Deletar' }}
                 </button>
-                <button class="edit-button" @click="toggleEditMode" :disabled="!canEditTask">
+                <button v-if="hasEditPermission" class="edit-button" @click="toggleEditMode" :disabled="!canEditTask">
                     Alterar
                 </button>
             </div>
