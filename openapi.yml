@@ -348,7 +348,7 @@ paths:
       summary: Remoção de tarefa
       description: Remove uma tarefa pelo ID.
       responses:
-        '201':
+        '204':
           description: Tarefa removida com sucesso
         '401':
           $ref: '#/components/responses/UnauthorizedError'
